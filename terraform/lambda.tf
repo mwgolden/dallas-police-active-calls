@@ -17,7 +17,8 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_role" {
 
 resource "null_resource" "build_dpd_active_calls_downloader" {
   provisioner "local-exec" {
-    command = "..lambda/build.sh dpd_active_calls_downloader build/dpd_active_calls_downloader"
+    working_dir = "../lambda"
+    command = "./build.sh dpd_active_calls_downloader build/dpd_active_calls_downloader"
   }
 }
 
@@ -25,6 +26,7 @@ data "archive_file" "deploy_dpd_active_calls_downloader" {
     type = "zip"
     source_dir = "../lambda/build/dpd_active_calls_downloader/"
     output_path = "../lambda/deploy/dpd-active-calls-downloader.zip"
+    depends_on = [ null_resource.build_dpd_active_calls_downloader ]
 }
 
 data "aws_lambda_function" "fn_query_rest_api" {
@@ -38,7 +40,7 @@ resource "aws_lambda_function" "dpd_active_calls_downloader_lambda" {
     handler = "app.lambda_handler"
     runtime = "python3.12"
     depends_on = [ aws_iam_role_policy_attachment.attach_iam_policy_to_role ]
-    source_code_hash = data.archive_file.build_dpd_active_calls_downloader.output_base64sha256
+    source_code_hash = data.archive_file.deploy_dpd_active_calls_downloader.output_base64sha256
     timeout = 60
     environment {
         variables = {

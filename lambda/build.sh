@@ -16,6 +16,6 @@ mkdir -p "$BUILD_DIR"
 cp -r "$SOURCE_DIR"/* "$BUILD_DIR"
 
 # Install Python requirements into the build directory
-pip install -r requirements.txt -t "$BUILD_DIR"
+pip install -r "$SOURCE_DIR"/requirements.txt -t "$BUILD_DIR"
 
 echo "Files copied and dependencies installed in the build directory."
