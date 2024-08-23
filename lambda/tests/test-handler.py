@@ -1,5 +1,5 @@
 import pytest
-from get_active_calls.app import lambda_handler
+from dpd_active_calls_downloader.app import lambda_handler
 
 def test_lambda_handler():
     event = {"key": "value"}
