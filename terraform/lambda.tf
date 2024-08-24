@@ -7,7 +7,7 @@ resource "aws_iam_policy" "lambda_policy" {
     name = "dpd_active_calls_downloader_policy"
     path = "/"
     description = "AWS IAM Poplicy for DPD Active Calls Downloader lambda"
-    policy = data.aws_iam_policy_document.Lambda_policy.json
+    policy = data.aws_iam_policy_document.lambda_policy_downloader.json
 }
 
 resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_role" {
@@ -44,3 +44,49 @@ resource "aws_lambda_function" "dpd_active_calls_downloader_lambda" {
         }
     }
 }
+
+
+resource "aws_iam_role" "lambda_role_event_handler" {
+    name = "dpd_active_calls_download_event_handler"
+    assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+}
+
+resource "aws_iam_policy" "lambda_policy_event_handler" {
+    name = "dpd_active_calls_download_event_handler_policy"
+    path = "/"
+    description = "AWS IAM Poplicy for DPD Active Calls transformer lambda"
+    policy = data.aws_iam_policy_document.lambda_policy_event_handler.json
+}
+
+resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_event_handler_role" {
+    role = aws_iam_role.lambda_role_event_handler.name
+    policy_arn = aws_iam_policy.lambda_policy_event_handler.arn
+}
+
+data "archive_file" "deploy_dpd_active_calls_download_event_handler" {
+    type = "zip"
+    source_dir = "../lambda/build/dpd_active_calls_download_event_handler/"
+    output_path = "../lambda/deploy/dpd-active-calls-download-event-handler.zip"
+}
+
+
+resource "aws_lambda_function" "dpd_active_calls_download_event_handler_lambda" {
+    filename = "../lambda/deploy/dpd-active-calls-download-event-handler.zip"
+    function_name = "dpd_active_calls_download_event_handler"
+    role = aws_iam_role.lambda_role_event_handler.arn
+    handler = "app.lambda_handler"
+    runtime = "python3.12"
+    depends_on = [ aws_iam_role_policy_attachment.attach_iam_policy_to_event_handler_role ]
+    source_code_hash = data.archive_file.deploy_dpd_active_calls_download_event_handler.output_base64sha256
+    timeout = 60
+}
+
+/*
+resource "aws_lambda_permission" "allow_event_bridge" {
+  statement_id = "AllowExecutionFromEventBridge"
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.dpd_active_calls_downloader_lambda.function_name
+  principal = "events.amazonaws.com"
+  source_arn = aws_cloudwatch_event_rule.every_2_minutes.arn
+}
+*/
