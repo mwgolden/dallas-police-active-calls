@@ -81,7 +81,7 @@ resource "aws_lambda_function" "dpd_active_calls_download_event_handler_lambda" 
     timeout = 60
 }
 
-/*
+
 resource "aws_lambda_permission" "allow_event_bridge" {
   statement_id = "AllowExecutionFromEventBridge"
   action = "lambda:InvokeFunction"
@@ -89,4 +89,3 @@ resource "aws_lambda_permission" "allow_event_bridge" {
   principal = "events.amazonaws.com"
   source_arn = aws_cloudwatch_event_rule.every_2_minutes.arn
 }
-*/

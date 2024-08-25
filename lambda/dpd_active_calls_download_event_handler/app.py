@@ -29,12 +29,27 @@ def save_to_bucket(file, path):
     return response
 
 def to_flat_file(json_data):
+    object_keys = ["incident_number",
+            "division",
+            "nature_of_call",
+            "priority",
+            "date",
+            "time",
+            "unit_number",
+            "block",
+            "location",
+            "beat",
+            "reporting_area",
+            "status"]
     download_date = json_data['as_of']
     body = json_data['body']
-    headers = list(body[0].keys()) + ['download_date']
+    headers = object_keys + ['download_date']
     file = "|".join(headers) + '\n'
     for item in body:
-        row = list(item.values()) + [download_date]
+        row = []
+        for header in object_keys:
+            row = row + [item.get(header) if item.get(header) is not None else "" ]
+        row = row + [download_date]
         file = file + "|".join(row) + '\n'
     byte_array = BytesIO(file.encode('utf-8'))
     return byte_array
