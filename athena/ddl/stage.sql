@@ -18,7 +18,7 @@ with serdeproperties (
     'field.delim' = '|',
     'serialization.format' = '|'
 )
-location 's3://<path>'
+location 's3://com.wgolden.dallas-police-active-calls/stage/'
 TBLPROPERTIES (
     'skip.header.line.count' = '1',
     'has_encrypted_data'='false'
