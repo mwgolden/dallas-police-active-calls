@@ -1,4 +1,5 @@
 import sys
+import datetime
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
@@ -12,6 +13,10 @@ sc = SparkContext.getOrCreate()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
+
+spark.conf.set('spark.sql.sources.partitionOverwriteMode','dynamic')
+
+FULL_REFRESH = False
 
 active_calls_dynf = glueContext.create_dynamic_frame.from_catalog(database='dpd_active_calls', table_name='stage')
 active_calls_df = active_calls_dynf.toDF()
@@ -38,8 +43,8 @@ tx_df = (active_calls_df
      )
 )
 
-# Get most recent versions of rows
-recent_df = (tx_df
+# Get new versions of rows
+newest_download_df = (tx_df
                 .select('incident_number', 'unit_number', 'download_datetime')
                 .groupBy('incident_number', 'unit_number')
                 .agg(
@@ -47,30 +52,47 @@ recent_df = (tx_df
                 )
             )
 
-recent_df = recent_df.withColumn('partition_key', F.to_date('download_datetime'))
+newest_download_df = newest_download_df.withColumn('partition_key', F.to_date('download_datetime'))
 # Produce data frame with most recent row versions
 final_df = (tx_df
-                .join(recent_df, ['incident_number', 'unit_number', 'download_datetime'])
+                .join(newest_download_df, ['incident_number', 'unit_number', 'download_datetime'])
            )
 
-from awsglue.dynamicframe import DynamicFrame
+if FULL_REFRESH:
+    (final_df
+        .write
+        .mode('overwrite')
+        .format('parquet')
+        .partitionBy('partition_key')
+        .save('s3://com.wgolden.dallas-police-active-calls/transformed/'))
+else:
+    # Define partitions for update/insert >= previous day
+    # this will reduce the number of files overwritten
+    end_date = datetime.datetime.now()
+    start_date = end_date - datetime.timedelta(days=1)
+    date_format = '%Y-%m-%d'
+    start_partition = start_date.strftime(date_format)
+    end_partition = end_date.strftime(date_format)
 
-transformed_calls_dynf = glueContext.create_dynamic_frame.from_catalog(database='dpd_active_calls', table_name='transformed')
-transformed_calls_dynf = transformed_calls_dynf.toDF()
+    existing_df = spark.read.parquet(
+        f"s3://com.wgolden.dallas-police-active-calls/transformed/partition_key={start_partition}/",
+        f"s3://com.wgolden.dallas-police-active-calls/transformed/partition_key={end_partition}/"
+    ).withColumn('partition_key', F.to_date('download_datetime'))
 
+    updates_df = final_df.where(f"partition_key >= '{start_partition}'")
+    merged_df = (
+        existing_df.alias('existing')
+            .join(
+                updates_df.alias('new'), ['incident_number', 'unit_number'], 'outer'
+            )
+            .select(
+                *[F.coalesce('new.' + col, 'existing.' + col).alias(col) for col in updates_df.columns]
+            )
+    )
 
-dyf = DynamicFrame.fromDF(final_df, glueContext, 'convert_to_dynamic_frame')
-
-glueContext.write_dynamic_frame.from_options(
-    frame=dyf,
-    connection_type='s3',
-    connection_options={
-        "path": 's3://com.wgolden.dallas-police-active-calls/transformed/',
-        "partitionKeys": ['partition_key']
-    },
-    format='parquet',
-    format_options={
-        "compression": "gzip"
-    },
-    transformation_ctx='write_s3_parquet'
-)
+    (merged_df
+        .write
+        .mode('overwrite')
+        .format('parquet')
+        .partitionBy('partition_key')
+        .save('s3://com.wgolden.dallas-police-active-calls/transformed/'))
