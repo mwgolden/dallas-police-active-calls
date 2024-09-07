@@ -17,24 +17,6 @@ data "aws_iam_policy_document" "sqs_policy" {
     }
 }
 
-data "aws_iam_policy_document" "sqs_lambda_policy" {
-    statement {
-      effect = "Allow"
-      
-      principals {
-        type = "*"
-        identifiers = [ "*" ]
-      }
-      actions = ["sqs:SendMessage"]
-      resources = [ "arn:aws:sqs:*:*:dpd-active-calls-process-address-queue" ]
-      condition {
-        test = "ArnEquals"
-        variable = "aws:SourceArn"
-        values = [aws_lambda_function.dpd_active_calls_download_event_handler_lambda.arn]
-      }
-    }
-}
-
 resource "aws_sqs_queue" "s3_created_queue" {
     name = "dpd-active-calls-raw-file-created-queue"
     max_message_size = 2048
@@ -62,5 +44,4 @@ resource "aws_sqs_queue" "address_processing_queue" {
     max_message_size = 2048
     message_retention_seconds = 60
     visibility_timeout_seconds = 90
-    policy = data.aws_iam_policy_document.sqs_lambda_policy.json 
 }

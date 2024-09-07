@@ -6,6 +6,8 @@ from io import BytesIO
 from hashlib import sha1
 
 QUEUE_URL = os.getenv('ADDRESS_QUEUE_URL')
+ADDRESS_CACHE_TBL = os.getenv('ADDRESS_CACHE_TABLE')
+DPD_ACTIVE_CALLS_TBL = os.getenv('DPD_ACTIVE_CALLS_TABLE')
 
 
 def get_records(event_object: dict) -> list:
@@ -64,9 +66,20 @@ def get_address_id(address_record):
 
 def check_address_cache(address_id):
     db = boto3.resource('dynamodb')
-    cache = db.Table('address_cache')
+    cache = db.Table(ADDRESS_CACHE_TBL)
     response = cache.get_item(Key = {'address_id': address_id})
     return response.get('Item')
+
+def put_record(record):
+    db_client = boto3.client('dynamodb')
+    item = {}
+    for key, val in record.items():
+        item[key] = {'S': val}
+    
+    response = db_client.put_item(
+        Item=item,
+        TableName=DPD_ACTIVE_CALLS_TBL
+    )
 
 def transform_address(record):
     address = {}
@@ -91,12 +104,15 @@ def enqueue(address_record):
     )
     print(response)
 
-def check_addresses(json_data):
+def update_addresses(json_data, update_date):
     for record in json_data:
         address_dict = transform_address(record)
         id = address_dict['address_id']
+        record['address_id'] = id
+        record['update_dt'] = update_date
         if not check_address_cache(address_id = id):
             enqueue(address_dict)
+        put_record(record=record)
 
 
 def lambda_handler(event, context):
@@ -104,7 +120,9 @@ def lambda_handler(event, context):
     for e in events:
         file = (e['s3']['bucket']['name'], e['s3']['object']['key'])
         json_data = read_file(file)
-        check_addresses(json_data=json_data)
+        download_date = json_data['as_of']
+        records = json_data['body']
+        update_addresses(records, download_date)
         
 
 

@@ -82,6 +82,8 @@ resource "aws_lambda_function" "dpd_active_calls_download_event_handler_lambda" 
     environment {
       variables = {
         ADDRESS_QUEUE_URL = "https://sqs.${local.region}.amazonaws.com/${local.account_id}/dpd-active-calls-process-address-queue"
+        ADDRESS_CACHE_TABLE = "${aws_dynamodb_table.address_cache.id}"
+        DPD_ACTIVE_CALLS_TABLE = "${aws_dynamodb_table.dpd_active_calls.id}"
       }
     }
 }
