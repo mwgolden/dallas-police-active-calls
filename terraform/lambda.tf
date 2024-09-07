@@ -79,9 +79,14 @@ resource "aws_lambda_function" "dpd_active_calls_download_event_handler_lambda" 
     depends_on = [ aws_iam_role_policy_attachment.attach_iam_policy_to_event_handler_role ]
     source_code_hash = data.archive_file.deploy_dpd_active_calls_download_event_handler.output_base64sha256
     timeout = 60
+    environment {
+      variables = {
+        ADDRESS_QUEUE_URL = "https://sqs.${local.region}.amazonaws.com/${local.account_id}/dpd-active-calls-process-address-queue"
+      }
+    }
 }
 
-
+/*
 resource "aws_lambda_permission" "allow_event_bridge" {
   statement_id = "AllowExecutionFromEventBridge"
   action = "lambda:InvokeFunction"
@@ -89,3 +94,4 @@ resource "aws_lambda_permission" "allow_event_bridge" {
   principal = "events.amazonaws.com"
   source_arn = aws_cloudwatch_event_rule.every_2_minutes.arn
 }
+*/

@@ -1,7 +1,11 @@
 import json
 import functools
 import boto3
+import os
 from io import BytesIO
+from hashlib import sha1
+
+QUEUE_URL = os.getenv('ADDRESS_QUEUE_URL')
 
 
 def get_records(event_object: dict) -> list:
@@ -54,14 +58,54 @@ def to_flat_file(json_data):
     byte_array = BytesIO(file.encode('utf-8'))
     return byte_array
 
+def get_address_id(address_record):
+    address_string = '|'.join(address_record.values())
+    return sha1(address_string.encode(encoding='utf-8')).hexdigest()
+
+def check_address_cache(address_id):
+    db = boto3.resource('dynamodb')
+    cache = db.Table('address_cache')
+    response = cache.get_item(Key = {'address_id': address_id})
+    return response.get('Item')
+
+def transform_address(record):
+    address = {}
+    block = record.get('block')
+    location = record.get('location')
+    if block:
+        address['address_type'] = 'exact'
+    else:
+        address['address_type'] = 'intersection'
+    address['block'] = '' if block is None else block.lower()
+    address['location'] = ",".join([val.strip().lower() for val in location.split('/')])
+    address['city'] = 'dallas'
+    address['state'] = 'tx'
+    address['address_id'] = get_address_id(address)
+    return address
+
+def enqueue(address_record):
+    sqs_client = boto3.client('sqs')
+    response = sqs_client.send_message(
+        QueueUrl=QUEUE_URL,
+        MessageBody=json.dumps(address_record)
+    )
+    print(response)
+
+def check_addresses(json_data):
+    for record in json_data:
+        address_dict = transform_address(record)
+        id = address_dict['address_id']
+        if not check_address_cache(address_id = id):
+            enqueue(address_dict)
+
+
 def lambda_handler(event, context):
     events = get_records(event)
     for e in events:
         file = (e['s3']['bucket']['name'], e['s3']['object']['key'])
         json_data = read_file(file)
-        flat_file = to_flat_file(json_data)
-        flat_file_path = (file[0], file[1].replace('raw', 'stage').replace('json', 'psv'))
-        save_to_bucket(flat_file, flat_file_path)
+        check_addresses(json_data=json_data)
+        
 
 
 
