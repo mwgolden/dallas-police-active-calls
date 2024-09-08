@@ -84,6 +84,7 @@ resource "aws_lambda_function" "dpd_active_calls_download_event_handler_lambda" 
         ADDRESS_QUEUE_URL = "https://sqs.${local.region}.amazonaws.com/${local.account_id}/dpd-active-calls-process-address-queue"
         ADDRESS_CACHE_TABLE = "${aws_dynamodb_table.address_cache.id}"
         DPD_ACTIVE_CALLS_TABLE = "${aws_dynamodb_table.dpd_active_calls.id}"
+        TTL_SECONDS = "129600"
       }
     }
 }
@@ -126,6 +127,7 @@ resource "aws_lambda_function" "dpd_forward_geocoder_lambda" {
         ADDRESS_CACHE_TABLE = "${aws_dynamodb_table.address_cache.id}"
         RADAR_ENDPOINT = "https://api.radar.io/v1/geocode/forward"
         LAMBDA_TO_INVOKE = "query_rest_api"
+        TTL_SECONDS = "129600"
       }
     }
 }

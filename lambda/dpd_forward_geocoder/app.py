@@ -1,12 +1,15 @@
 import boto3
 import json
 import os
+import time
 
 ADDRESS_CACHE_TBL = os.getenv('ADDRESS_CACHE_TABLE')
 RADAR = os.getenv('RADAR_ENDPOINT')
 LAMBDA_QUERY_REST_API = os.getenv('LAMBDA_TO_INVOKE')
+TTL_SECONDS = int(os.getenv('TTL_SECONDS')) 
 
 def query_radar(query_string):
+    print(f'URL: {RADAR + query_string}')
     bot = 'radar'
     endpoint = RADAR + query_string
     evt = {
@@ -62,6 +65,7 @@ def lambda_handler(event, context):
             addresses = query_radar(query_string=query)
             item = {
                 'address_id': {'S': address_id},
+                'expires_on': convert_to_item(int(time.time()) + TTL_SECONDS),
                 'addresses': convert_to_item(addresses)
             }
             print(item)

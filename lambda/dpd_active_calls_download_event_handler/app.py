@@ -2,12 +2,14 @@ import json
 import functools
 import boto3
 import os
+import time
 from io import BytesIO
 from hashlib import sha1
 
 QUEUE_URL = os.getenv('ADDRESS_QUEUE_URL')
 ADDRESS_CACHE_TBL = os.getenv('ADDRESS_CACHE_TABLE')
 DPD_ACTIVE_CALLS_TBL = os.getenv('DPD_ACTIVE_CALLS_TABLE')
+TTL_SECONDS = int(os.getenv('TTL_SECONDS')) 
 
 
 def get_records(event_object: dict) -> list:
@@ -74,12 +76,24 @@ def put_record(record):
     db_client = boto3.client('dynamodb')
     item = {}
     for key, val in record.items():
-        item[key] = {'S': val}
+        item[key] = convert_to_item(val)
     
     response = db_client.put_item(
         Item=item,
         TableName=DPD_ACTIVE_CALLS_TBL
     )
+
+def convert_to_item(record):
+    if isinstance(record, str):
+        return {'S': record}
+    elif isinstance(record, (int, float)):
+        return {'N': str(record)}
+    elif isinstance(record, list):
+        return {'L': [convert_to_item(val) for val in record]}
+    elif isinstance(record, dict):
+        return {'M': {key: convert_to_item(val) for key, val in record.items()}}
+    else:
+        raise ValueError(f'Unsupported type: {type(record)}')
 
 def transform_address(record):
     address = {}
@@ -110,6 +124,8 @@ def update_addresses(json_data, update_date):
         id = address_dict['address_id']
         record['address_id'] = id
         record['update_dt'] = update_date
+        record['call_id'] = '|'.join([record['incident_number'], record['unit_number']])
+        record['expires_on'] = int(time.time()) + TTL_SECONDS
         if not check_address_cache(address_id = id):
             enqueue(address_dict)
         put_record(record=record)

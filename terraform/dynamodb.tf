@@ -10,7 +10,7 @@ resource "aws_dynamodb_table" "address_cache" {
     }
     
     ttl {
-      attribute_name = "TimeToExist"
+      attribute_name = "expires_on"
       enabled = true
       
     }
@@ -18,23 +18,23 @@ resource "aws_dynamodb_table" "address_cache" {
 
 resource "aws_dynamodb_table" "dpd_active_calls" {
 
-    hash_key = "incident_number"
-    range_key = "unit_number"
+    hash_key = "call_id"
+    range_key = "update_dt"
     name = "dpd_active_calls"
     read_capacity = 1
     write_capacity = 1
     attribute {
-      name = "incident_number"
+      name = "call_id"
       type = "S"
     }
 
     attribute {
-      name = "unit_number"
+      name = "update_dt"
       type = "S"
     }
     
     ttl {
-      attribute_name = "TimeToExist"
+      attribute_name = "expires_on"
       enabled = true
       
     }
