@@ -45,3 +45,8 @@ resource "aws_sqs_queue" "address_processing_queue" {
     message_retention_seconds = 60
     visibility_timeout_seconds = 90
 }
+
+resource "aws_lambda_event_source_mapping" "address_queued_event" {
+  event_source_arn = aws_sqs_queue.address_processing_queue.arn
+  function_name = aws_lambda_function.dpd_forward_geocoder_lambda.arn
+}
