@@ -5,10 +5,12 @@ import os
 import time
 from io import BytesIO
 from hashlib import sha1
+from datetime import datetime
 
-QUEUE_URL = os.getenv('ADDRESS_QUEUE_URL')
+ADDRESS_QUEUE_URL = os.getenv('ADDRESS_QUEUE_URL')
 ADDRESS_CACHE_TBL = os.getenv('ADDRESS_CACHE_TABLE')
-DPD_ACTIVE_CALLS_TBL = os.getenv('DPD_ACTIVE_CALLS_TABLE')
+CHANGE_PROCESS_QUEUE = os.getenv('CHANGE_PROCESS_QUEUE')
+FILE_CACHE = os.getenv('FILE_CACHE')
 TTL_SECONDS = int(os.getenv('TTL_SECONDS')) 
 
 
@@ -72,7 +74,24 @@ def check_address_cache(address_id):
     response = cache.get_item(Key = {'address_id': address_id})
     return response.get('Item')
 
-def put_record(record):
+def get_cache_file(bucket):
+    db = boto3.resource('dynamodb')
+    cache = db.Table(FILE_CACHE)
+    response = cache.get_item(Key = {'s3_bucket': bucket})
+    return response.get('Item')
+
+def update_cache_file(bucket, key):
+    db_client = boto3.client('dynamodb')
+    item = {
+        's3_bucket': {'S': bucket},
+        'key': {'S': key}
+    }
+    response = db_client.put_item(
+        Item=item,
+        TableName=FILE_CACHE
+    )
+
+def put_record(record, table):
     db_client = boto3.client('dynamodb')
     item = {}
     for key, val in record.items():
@@ -80,7 +99,7 @@ def put_record(record):
     
     response = db_client.put_item(
         Item=item,
-        TableName=DPD_ACTIVE_CALLS_TBL
+        TableName=table
     )
 
 def convert_to_item(record):
@@ -110,88 +129,86 @@ def transform_address(record):
     address['address_id'] = get_address_id(address)
     return address
 
-def enqueue(address_record):
+def enqueue(record, queue):
     sqs_client = boto3.client('sqs')
     response = sqs_client.send_message(
-        QueueUrl=QUEUE_URL,
-        MessageBody=json.dumps(address_record)
+        QueueUrl=queue,
+        MessageBody=json.dumps(record)
     )
     print(response)
 
-def update_addresses(json_data, update_date):
+def update_addresses(json_data):
     for record in json_data:
         address_dict = transform_address(record)
         id = address_dict['address_id']
         record['address_id'] = id
-        record['update_dt'] = update_date
         record['call_id'] = '|'.join([record['incident_number'], record['unit_number']])
         record['expires_on'] = int(time.time()) + TTL_SECONDS
         if not check_address_cache(address_id = id):
-            enqueue(address_dict)
-        put_record(record=record)
+            enqueue(address_dict, ADDRESS_QUEUE_URL)
 
-def last_two_files(bucket, prefix):
-    s3 = boto3.client('s3')
-    s3_objects = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
-    result = s3_objects['Contents']
-    while s3_objects.get('NextContinuationToken'):
-        token = s3_objects['NextContinuationToken']
-        s3_objects = s3.list_objects_v2(Bucket=bucket, Prefix=prefix, ContinuationToken=token)
-        result = result + s3_objects['Contents']
-    sorted_results = sorted(result, key=lambda o: o['LastModified'])
-    sorted_results = [result for result in sorted_results if result['Size'] > 0]
-    last_two = sorted_results[-2:]
-    for file in last_two:
-        file['body'] = read_file((bucket, file['Key']))['body']
-    return last_two
 
-def columns_are_same(key, cur_file, prev_file):
-    incident_number = key[0]
-    unit_number = key[1]
-    cur_row = []
-    prev_row = []
-    for f in cur_file['body']:
-        if f['incident_number'] == incident_number and f['unit_number'] == unit_number:
-            cur_row = list(f.values())
-
-    for f in prev_file['body']:
-        if f['incident_number'] == incident_number and f['unit_number'] == unit_number:
-            prev_row = list(f.values()) 
-            
+def records_are_equal(cur, prev):
+    cur_row = [cur[key] for key in cur.keys() if key != 'download_date']
+    prev_row = [prev[key] for key in prev.keys() if key != 'download_date']
     cur_hash = sha1('|'.join(cur_row).encode(encoding='utf-8')).hexdigest()
     prev_hash = sha1('|'.join(prev_row).encode(encoding='utf-8')).hexdigest()
     return cur_hash == prev_hash
 
-def compare_files(cur_file, prev_file):
-    cur = set([(item['incident_number'], item['unit_number']) for item in cur_file['body']])
-    prev = set([(item['incident_number'], item['unit_number']) for item in prev_file['body']])
-    to_delete = prev - cur
-    to_add = cur - prev
-    to_update = set([item for item in cur & prev if not columns_are_same(item, cur_file, prev_file)])
+def compare_files(cur_data, prev_data = None):
+    cur = set(list(cur_data.keys()))
+    to_delete = []
+    to_add = []
+    to_update = []
+    if prev_data:
+        prev = set(list(prev_data.keys()))
+        to_delete = [prev_data[id] for id in prev - cur]
+        to_add = [cur_data[id] for id in cur - prev]
+        to_update = [cur_data[id] for id in cur & prev if not records_are_equal(cur_data[id], prev_data[id])]
+    else:
+        to_add = [cur_data[id] for id in cur]
+        
     return {
         'to_delete': to_delete,
         'to_add': to_add,
         'to_update': to_update
     }
 
+def get_file_body(file: tuple):
+    if not file:
+        return None
+    data = read_file(file)
+    body = data['body']
+    download_date = data['as_of']
+    return_obj = {}
+    for item in body:
+        item['download_date'] = download_date
+        id = (item['incident_number'], item['unit_number'])
+        return_obj[id] = item 
+    return return_obj
+
 
 def lambda_handler(event, context):
+    """
+        The download event handler processes file download events.  
+        1. Compares current and previous files for add, updates, and deletes
+        2. Checks an address cache to verify if the location has been geocoded
+        3. enqueues changes for further processing
+        4. enqueues new locations for forward geocoding
+    """
     events = get_records(event)
     for e in events:
-        file = (e['s3']['bucket']['name'], e['s3']['object']['key'])
-        json_data = read_file(file)
-        download_date = json_data['as_of']
-        records = json_data['body']
-        update_addresses(records, download_date)
-
-        for file in files:
-     ...:     tuples = set()
-     ...:     for item in file['body']:
-     ...:         tuples.add(tuple([item['incident_number'], item['unit_number']]))
-     ...:     file['tuples'] = tuples
-
-
-        
-
+        bucket = e['s3']['bucket']['name']
+        key = e['s3']['object']['key']
+        cached_file = get_cache_file(bucket)
+        cur_file = (bucket, key)
+        prev_file = (cached_file['s3_bucket'], cached_file['key']) if cached_file else None
+        cur_data = get_file_body(cur_file)
+        prev_data = get_file_body(prev_file)
+        changes = compare_files(cur_data, prev_data)
+        print([f'{key}: {len(changes[key])}'for key in changes.keys()])
+        enqueue(changes, CHANGE_PROCESS_QUEUE)
+        update_addresses(cur_data)
+        update_cache_file(bucket, key)
 
 

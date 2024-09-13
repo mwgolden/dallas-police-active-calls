@@ -39,3 +39,21 @@ resource "aws_dynamodb_table" "dpd_active_calls" {
       
     }
 }
+
+resource "aws_dynamodb_table" "dpd_active_calls_file_cache" {
+
+    hash_key = "s3_bucket"
+    name = "dpd_active_calls_file_cache"
+    read_capacity = 1
+    write_capacity = 1
+    attribute {
+      name = "s3_bucket"
+      type = "S"
+    }
+    
+    ttl {
+      attribute_name = "expires_on"
+      enabled = true
+      
+    }
+}
