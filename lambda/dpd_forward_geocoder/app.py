@@ -2,6 +2,7 @@ import boto3
 import json
 import os
 import time
+import math
 
 ADDRESS_CACHE_TBL = os.getenv('ADDRESS_CACHE_TABLE')
 RADAR = os.getenv('RADAR_ENDPOINT')
@@ -26,19 +27,13 @@ def query_radar(query_string):
     addresses = payload['body']['addresses']
     return addresses
 
-
-def check_address_cache(address_id):
-    db = boto3.resource('dynamodb')
-    cache = db.Table(ADDRESS_CACHE_TBL)
-    response = cache.get_item(Key = {'address_id': address_id})
-    return response.get('Item')
-
-def put_record(item):
-    db_client = boto3.client('dynamodb')    
-    response = db_client.put_item(
-        Item=item,
-        TableName=ADDRESS_CACHE_TBL
-    )
+def put_records(items):
+    db_client = boto3.client('dynamodb')   
+    requests = [{'PutRequest': {'Item': addr}} for addr in items] 
+    for i in range(math.ceil(len(requests) / 25)):
+        start = i * 25
+        end = start + 24
+        db_client.batch_write_item(RequestItems={ADDRESS_CACHE_TBL: requests[start:end]})
 
 def convert_to_item(record):
     if isinstance(record, str):
@@ -53,22 +48,29 @@ def convert_to_item(record):
         raise ValueError(f'Unsupported type: {type(record)}')
 
 def lambda_handler(event, context):
+    print(event)
+    body = []
     for record in event['Records']:
-        body = json.loads(record['body'])
-        address_id = body['address_id']
-        if not check_address_cache(address_id=address_id):
-            query = ''
-            if body['address_type'] == 'exact':
-                query = f"?query=${body['city']}+${body['state']}+${body['block']}+${body['location']}"
-            else:
-                query = f"?query=${body['city']}+${body['state']}+${body['location'].replace(',', ' and ')}"
-            addresses = query_radar(query_string=query)
-            item = {
-                'address_id': {'S': address_id},
-                'expires_on': convert_to_item(int(time.time()) + TTL_SECONDS),
-                'addresses': convert_to_item(addresses)
-            }
-            print(item)
-            put_record(item)
+        if isinstance(body, list):
+            body = body + json.loads(record['body'])
+        else:
+            body = body + [json.loads(record['body'])]
+    items = []
+    for address in body:
+        address_id = address['address_id']
+        query = ''
+        if address['address_type'] == 'exact':
+            query = f"?query=${address['city']}+${address['state']}+${address['block']}+${address['location']}"
+        else:
+            query = f"?query=${address['city']}+${address['state']}+${address['location'].replace(',', ' and ')}"
+        addresses = query_radar(query_string=query)
+        addr_item = {
+            'address_id': {'S': address_id},
+            'expires_on': convert_to_item(int(time.time()) + TTL_SECONDS),
+            'addresses': convert_to_item(addresses)
+        }
+        print(addr_item)
+        items.append(addr_item)
+    put_records(items)
                 
 

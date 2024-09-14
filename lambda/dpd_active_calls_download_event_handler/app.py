@@ -129,6 +129,14 @@ def transform_address(record):
     address['address_id'] = get_address_id(address)
     return address
 
+def unique_addresses(data):
+    addresses = [transform_address(record) for record in data]
+    unique_addresses = []
+    for address in addresses:
+        if address not in unique_addresses:
+            unique_addresses = unique_addresses + [address]
+    return unique_addresses
+
 def enqueue(record, queue):
     sqs_client = boto3.client('sqs')
     response = sqs_client.send_message(
@@ -137,15 +145,16 @@ def enqueue(record, queue):
     )
     print(response)
 
-def update_addresses(json_data):
-    for record in json_data:
-        address_dict = transform_address(record)
-        id = address_dict['address_id']
-        record['address_id'] = id
-        record['call_id'] = '|'.join([record['incident_number'], record['unit_number']])
-        record['expires_on'] = int(time.time()) + TTL_SECONDS
-        if not check_address_cache(address_id = id):
-            enqueue(address_dict, ADDRESS_QUEUE_URL)
+def query_address_cache(unique_locations):
+    db = boto3.resource('dynamodb')
+    address_cache = db.Table(ADDRESS_CACHE_TBL)
+    batch_keys = {
+        address_cache.name: {
+            'Keys': [{'address_id': loc['address_id']} for loc in unique_locations]
+        }
+    }
+    response = db.batch_get_item(RequestItems=batch_keys)
+    return response
 
 
 def records_are_equal(cur, prev):
@@ -183,6 +192,8 @@ def get_file_body(file: tuple):
     return_obj = {}
     for item in body:
         item['download_date'] = download_date
+        item['address_id'] = transform_address(item)['address_id']
+        item['expires_on'] = int(time.time()) + TTL_SECONDS
         id = (item['incident_number'], item['unit_number'])
         return_obj[id] = item 
     return return_obj
@@ -208,7 +219,11 @@ def lambda_handler(event, context):
         changes = compare_files(cur_data, prev_data)
         print([f'{key}: {len(changes[key])}'for key in changes.keys()])
         enqueue(changes, CHANGE_PROCESS_QUEUE)
-        update_addresses(cur_data)
+        flatten_cur_data = [cur_data[id] for id in cur_data.keys()]
+        addresses = unique_addresses(flatten_cur_data)
+        query_results = query_address_cache(addresses)
+        result = set([address['address_id'] for address in query_results['Responses']['address_cache']])
+        new_addresses = [addr for addr in addresses if addr['address_id'] not in result]
+        if len(new_addresses) > 0:
+            enqueue(new_addresses, ADDRESS_QUEUE_URL)
         update_cache_file(bucket, key)
-
-
