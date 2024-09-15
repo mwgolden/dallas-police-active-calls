@@ -89,7 +89,7 @@ data "aws_iam_policy_document" "lambda_policy_event_handler" {
       actions = [ 
         "dynamodb:*"
        ]
-       resources = [ "${aws_dynamodb_table.address_cache.arn}", "${aws_dynamodb_table.dpd_active_calls_file_cache.arn}" ]
+       resources = [ "${aws_dynamodb_table.address_cache.arn}", "${aws_dynamodb_table.dpd_active_calls_file_cache.arn}", "${aws_dynamodb_table.dpd_active_calls.arn}" ]
     }
 }
 
