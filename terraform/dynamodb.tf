@@ -19,7 +19,7 @@ resource "aws_dynamodb_table" "address_cache" {
 resource "aws_dynamodb_table" "dpd_active_calls" {
 
     hash_key = "call_id"
-    range_key = "download_date"
+    range_key = "update_date"
     name = "dpd_active_calls"
     read_capacity = 1
     write_capacity = 1
@@ -29,7 +29,7 @@ resource "aws_dynamodb_table" "dpd_active_calls" {
     }
 
     attribute {
-      name = "download_date"
+      name = "update_date"
       type = "S"
     }
     

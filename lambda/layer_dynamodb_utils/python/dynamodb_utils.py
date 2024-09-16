@@ -24,7 +24,6 @@ def put_record(record, table):
         TableName=table
     )
 
-
 def put_records(items, table):
     db_client = boto3.client('dynamodb')   
     requests = [{'PutRequest': {'Item': item}} for item in items] 
@@ -32,4 +31,10 @@ def put_records(items, table):
         start = i * 25
         end = start + 24
         db_client.batch_write_item(RequestItems={table: requests[start:end]})
+
+def get_record(table, key):
+    db = boto3.resource('dynamodb')
+    tbl = db.Table(table)
+    response = tbl.get_item(Key = key)
+    return response.get('Item')
 

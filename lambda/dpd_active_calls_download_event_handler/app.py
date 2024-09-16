@@ -1,13 +1,11 @@
 import json
 import functools
-import boto3
 import os
 import time
-from io import BytesIO
 from hashlib import sha1
 from datetime import datetime
 from utils import read_file, transform_address
-from dynamodb_utils import convert_to_item, put_records
+from dynamodb_utils import convert_to_item, put_records, put_record, get_record
 
 ACTIVE_CALLS_TABLE = os.getenv('ACTIVE_CALLS_TABLE')
 FILE_CACHE = os.getenv('FILE_CACHE')
@@ -18,26 +16,9 @@ def get_records(event_object: dict) -> list:
     event_records = [json.loads(record.get('body')).get('Records') for record in event_object.get('Records')]
     return functools.reduce(lambda a, b: a + b, event_records)
 
-def get_cache_file(bucket):
-    db = boto3.resource('dynamodb')
-    cache = db.Table(FILE_CACHE)
-    response = cache.get_item(Key = {'s3_bucket': bucket})
-    return response.get('Item')
-
-def update_cache_file(bucket, key):
-    db_client = boto3.client('dynamodb')
-    item = {
-        's3_bucket': {'S': bucket},
-        'key': {'S': key}
-    }
-    response = db_client.put_item(
-        Item=item,
-        TableName=FILE_CACHE
-    )
-
 def records_are_equal(cur, prev):
-    cur_row = [str(cur[key]) for key in cur.keys() if key != 'download_date']
-    prev_row = [str(prev[key]) for key in prev.keys() if key != 'download_date']
+    cur_row = [str(cur[key]).lower() for key in cur.keys() if key != 'download_date']
+    prev_row = [str(prev[key]).lower() for key in prev.keys() if key != 'download_date']
     cur_hash = sha1('|'.join(cur_row).encode(encoding='utf-8')).hexdigest()
     prev_hash = sha1('|'.join(prev_row).encode(encoding='utf-8')).hexdigest()
     return cur_hash == prev_hash
@@ -70,10 +51,8 @@ def get_file_body(file: tuple):
         return None
     data = read_file(file)
     body = data['body']
-    download_date = data['as_of']
     return_obj = {}
     for item in body:
-        item['download_date'] = download_date
         id = (item['incident_number'], item['unit_number'])
         return_obj[id] = item 
     return return_obj
@@ -85,9 +64,11 @@ def persist_changes(changes):
     for k in changes.keys():
         records = records + changes[k]
     items = []
+    update_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     for record in records:
         concat_id_cols = record['incident_number'] + '|' + record['unit_number']
         record['call_id'] = sha1(concat_id_cols.encode(encoding='utf-8')).hexdigest()
+        record['update_date'] = update_date
         record['address_id'] = transform_address(record)['address_id']
         record['expires_on'] = int(time.time()) + TTL_SECONDS
         item = {}
@@ -109,7 +90,7 @@ def lambda_handler(event, context):
     for e in events:
         bucket = e['s3']['bucket']['name']
         key = e['s3']['object']['key']
-        cached_file = get_cache_file(bucket)
+        cached_file = get_record(FILE_CACHE, {'s3_bucket': bucket})
         cur_file = (bucket, key)
         prev_file = (cached_file['s3_bucket'], cached_file['key']) if cached_file else None
         cur_data = get_file_body(cur_file)
@@ -117,4 +98,4 @@ def lambda_handler(event, context):
         changes = compare_files(cur_data, prev_data)
         print([f'{key}: {len(changes[key])}'for key in changes.keys()])
         persist_changes(changes)
-        update_cache_file(bucket, key)
+        put_record({'s3_bucket': bucket, 'key': key}, FILE_CACHE)

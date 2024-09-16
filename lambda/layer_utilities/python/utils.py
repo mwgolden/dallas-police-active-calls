@@ -1,6 +1,7 @@
 import boto3
 import json
 from hashlib import sha1
+from io import BytesIO
 
 
 def read_file(file: tuple):
