@@ -19,28 +19,12 @@ def read_file(file: tuple):
         except json.JSONDecodeError as e:
             print(f'failed to parse json: {e}')  
     
-def to_flat_file(json_data):
-    object_keys = ["incident_number",
-            "division",
-            "nature_of_call",
-            "priority",
-            "date",
-            "time",
-            "unit_number",
-            "block",
-            "location",
-            "beat",
-            "reporting_area",
-            "status"]
-    download_date = json_data['as_of']
-    body = json_data['body']
-    headers = object_keys + ['download_date']
+def to_flat_file(data, headers):
     file = "|".join(headers) + '\n'
-    for item in body:
+    for item in data:
         row = []
-        for header in object_keys:
+        for header in headers:
             row = row + [item.get(header) if item.get(header) is not None else "" ]
-        row = row + [download_date]
         file = file + "|".join(row) + '\n'
     byte_array = BytesIO(file.encode('utf-8'))
     return byte_array

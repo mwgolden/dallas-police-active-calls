@@ -1,5 +1,4 @@
 import json
-import functools
 import os
 import time
 from hashlib import sha1
@@ -11,10 +10,6 @@ ACTIVE_CALLS_TABLE = os.getenv('ACTIVE_CALLS_TABLE')
 FILE_CACHE = os.getenv('FILE_CACHE')
 TTL_SECONDS = int(os.getenv('TTL_SECONDS')) 
 
-
-def get_records(event_object: dict) -> list:
-    event_records = [json.loads(record.get('body')).get('Records') for record in event_object.get('Records')]
-    return functools.reduce(lambda a, b: a + b, event_records)
 
 def records_are_equal(cur, prev):
     cur_row = [str(cur[key]).lower() for key in cur.keys() if key != 'download_date']
@@ -75,7 +70,6 @@ def persist_changes(changes):
         for key, val in record.items():
             item[key] = convert_to_item(val)
         items = items + [item]
-    print(items)
     put_records(items, ACTIVE_CALLS_TABLE)
 
 
@@ -86,7 +80,12 @@ def lambda_handler(event, context):
         2. Checks an address cache to verify if the location has been geocoded
         3. Persist changes to dynamodb
     """
-    events = get_records(event)
+    print(event)
+    events = []
+    for record in event['Records']:
+        event_body = json.loads(record['body'])
+        message = json.loads(event_body['Message'])
+        events.extend(message['Records'])
     for e in events:
         bucket = e['s3']['bucket']['name']
         key = e['s3']['object']['key']

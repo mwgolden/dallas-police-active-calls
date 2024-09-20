@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "lambda_policy_event_handler" {
+data "aws_iam_policy_document" "lambda_policy_downloader_address" {
     statement {
       effect = "Allow"
       actions = [
@@ -28,7 +28,16 @@ data "aws_iam_policy_document" "lambda_policy_event_handler" {
         "sqs:DeleteMessage",
         "sqs:GetQueueAttributes"
       ]
-      resources = [ "${aws_sqs_queue.s3_created_queue_1.arn}" ]
+      resources = [ "${aws_sqs_queue.s3_created_queue_2.arn}" ]
+    }
+
+    statement {
+      effect = "Allow"
+      actions = [ 
+        "sqs:SendMessage",
+        "sqs:GetQueueAttributes"
+      ]
+      resources = [ "${aws_sqs_queue.geocode_address_processing_queue.arn}" ]
     }
 
     statement {
@@ -36,6 +45,7 @@ data "aws_iam_policy_document" "lambda_policy_event_handler" {
       actions = [ 
         "dynamodb:*"
        ]
-       resources = [ "${aws_dynamodb_table.address_cache.arn}", "${aws_dynamodb_table.dpd_active_calls_file_cache.arn}", "${aws_dynamodb_table.dpd_active_calls.arn}" ]
+       resources = [ "${aws_dynamodb_table.address_cache.arn}" ]
     }
+
 }

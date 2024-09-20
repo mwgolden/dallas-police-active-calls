@@ -7,11 +7,11 @@ data "aws_iam_policy_document" "sqs_policy" {
         identifiers = [ "*" ]
       }
       actions = ["sqs:SendMessage"]
-      resources = [ "arn:aws:sqs:*:*:dpd-active-calls-raw-file-created-queue" ]
+      resources = [ aws_sqs_queue.s3_created_queue_1.arn ]
       condition {
         test = "ArnEquals"
         variable = "aws:SourceArn"
-        values = [aws_s3_bucket.police_data.arn]
+        values = [aws_sns_topic.s3_create_object_topic.arn]
       }
     }
 }

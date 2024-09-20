@@ -1,6 +1,6 @@
 import boto3
-from utils import transform_address
-
+import os
+from utils import read_file, transform_address, enqueue
 
 ADDRESS_QUEUE_URL = os.getenv('ADDRESS_QUEUE_URL')
 ADDRESS_CACHE_TBL = os.getenv('ADDRESS_CACHE_TABLE')
@@ -37,10 +37,21 @@ def query_address_cache(unique_locations):
 
 
 def lambda_handler(event, context):
-    flatten_cur_data = [cur_data[id] for id in cur_data.keys()]
-    addresses = unique_addresses(flatten_cur_data)
-    query_results = query_address_cache(addresses)
-    result = set([address['address_id'] for address in query_results['Responses']['address_cache']])
-    new_addresses = [addr for addr in addresses if addr['address_id'] not in result]
-    if len(new_addresses) > 0:
-        enqueue(new_addresses, ADDRESS_QUEUE_URL)
+    print(event)
+    events = []
+    for record in event['Records']:
+        event_body = json.loads(record['body'])
+        message = json.loads(event_body['Message'])
+        events.extend(message['Records'])
+    for e in events:
+        bucket = e['s3']['bucket']['name']
+        key = e['s3']['object']['key']
+        cur_file = (bucket, key)
+        cur_data = read_file(cur_file)['body']
+        addresses = [transform_address(record) for record in cur_data]
+        unique_addr = unique_addresses(unique_addr)
+        query_results = query_address_cache(unique_addr)
+        result = set([address['address_id'] for address in query_results['Responses']['address_cache']])
+        new_addresses = [addr for addr in addresses if addr['address_id'] not in result]
+        if len(new_addresses) > 0:
+            enqueue(new_addresses, ADDRESS_QUEUE_URL)

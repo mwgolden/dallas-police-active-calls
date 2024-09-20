@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "lambda_policy_geocoder" {
         "sqs:DeleteMessage",
         "sqs:GetQueueAttributes"
       ]
-      resources = [ "${aws_sqs_queue.address_processing_queue.arn}" ]
+      resources = [ "${aws_sqs_queue.geocode_address_processing_queue.arn}" ]
     }
 
     statement {
