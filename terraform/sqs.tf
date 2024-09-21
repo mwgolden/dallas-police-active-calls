@@ -20,9 +20,14 @@ resource "aws_sqs_queue" "s3_created_queue_2" {
    #policy = data.aws_iam_policy_document.sqs_policy.json 
 }
 
+resource "aws_sqs_queue_policy" "s3_created_queue_2_policy" {
+  queue_url = aws_sqs_queue.s3_created_queue_2.id
+  policy = data.aws_iam_policy_document.sqs_policy.json
+}
+
 resource "aws_sqs_queue" "geocode_address_processing_queue" {
     name = "dpd-active-calls-geocode-address-queue"
-    max_message_size = 2048
+    max_message_size = 60000
     message_retention_seconds = 60
     visibility_timeout_seconds = 90
 }

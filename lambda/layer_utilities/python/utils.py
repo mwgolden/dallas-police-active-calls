@@ -19,7 +19,7 @@ def read_file(file: tuple):
         except json.JSONDecodeError as e:
             print(f'failed to parse json: {e}')  
     
-def to_flat_file(data, headers):
+def to_byte_array(data, headers):
     file = "|".join(headers) + '\n'
     for item in data:
         row = []

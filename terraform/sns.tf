@@ -39,9 +39,10 @@ resource "aws_sns_topic_subscription" "download_event_subscription_1" {
     topic_arn = aws_sns_topic.s3_create_object_topic.arn
     protocol = "sqs"
     endpoint = aws_sqs_queue.s3_created_queue_1.arn
-    #filter_policy = <<EOF
-    #    {
-    #        "eventName": ["ObjectCreated:*"]
-    #    }
-    #EOF
+}
+
+resource "aws_sns_topic_subscription" "download_event_subscription_2" {
+    topic_arn = aws_sns_topic.s3_create_object_topic.arn
+    protocol = "sqs"
+    endpoint = aws_sqs_queue.s3_created_queue_2.arn
 }

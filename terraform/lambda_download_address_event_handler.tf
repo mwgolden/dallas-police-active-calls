@@ -33,7 +33,7 @@ resource "aws_lambda_function" "dpd_active_calls_download_event_handler_address_
     timeout = 60
     environment {
       variables = {
-        ADDRESS_QUEUE_URL = "https://sqs.${local.region}.amazonaws.com/${local.account_id}/dpd-active-calls-process-address-queue"
+        ADDRESS_QUEUE_URL = "https://sqs.${local.region}.amazonaws.com/${local.account_id}/dpd-active-calls-geocode-address-queue"
         ADDRESS_CACHE_TABLE = "${aws_dynamodb_table.address_cache.id}"
         TTL_SECONDS = "129600"
       }

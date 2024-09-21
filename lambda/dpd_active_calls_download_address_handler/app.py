@@ -1,5 +1,6 @@
 import boto3
 import os
+import json
 from utils import read_file, transform_address, enqueue
 
 ADDRESS_QUEUE_URL = os.getenv('ADDRESS_QUEUE_URL')
@@ -49,9 +50,9 @@ def lambda_handler(event, context):
         cur_file = (bucket, key)
         cur_data = read_file(cur_file)['body']
         addresses = [transform_address(record) for record in cur_data]
-        unique_addr = unique_addresses(unique_addr)
+        unique_addr = unique_addresses(addresses)
         query_results = query_address_cache(unique_addr)
         result = set([address['address_id'] for address in query_results['Responses']['address_cache']])
-        new_addresses = [addr for addr in addresses if addr['address_id'] not in result]
+        new_addresses = [addr for addr in unique_addr if addr['address_id'] not in result]
         if len(new_addresses) > 0:
             enqueue(new_addresses, ADDRESS_QUEUE_URL)

@@ -3,7 +3,7 @@ import os
 import time
 from hashlib import sha1
 from datetime import datetime
-from utils import read_file, transform_address
+from utils import read_file, transform_address, to_byte_array, save_to_bucket
 from dynamodb_utils import convert_to_item, put_records, put_record, get_record
 
 ACTIVE_CALLS_TABLE = os.getenv('ACTIVE_CALLS_TABLE')
