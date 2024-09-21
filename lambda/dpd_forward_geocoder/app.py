@@ -52,6 +52,7 @@ def lambda_handler(event, context):
         }
         print(addr_item)
         items.append(addr_item)
+        time.sleep(0.1) # ensure only 10 api requests per second
     put_records(items, ADDRESS_CACHE_TBL)
                 
 

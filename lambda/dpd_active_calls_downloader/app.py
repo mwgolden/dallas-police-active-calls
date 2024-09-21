@@ -32,6 +32,7 @@ def lambda_handler(event, context):
         InvocationType='RequestResponse',
         Payload=json.dumps(evt)
     )
+    print(response)
     data = json.load(response['Payload'])
     write_to_s3(data)
     return {

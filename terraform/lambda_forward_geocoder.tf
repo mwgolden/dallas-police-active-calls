@@ -40,4 +40,5 @@ resource "aws_lambda_function" "dpd_forward_geocoder_lambda" {
       }
     }
     layers = [ "${aws_lambda_layer_version.utils.arn}", "${aws_lambda_layer_version.dynamodb_utils.arn}" ]
+    reserved_concurrent_executions = 1
 }
