@@ -13,6 +13,21 @@ def convert_to_item(record):
     else:
         raise ValueError(f'Unsupported type: {type(record)}')
     
+def convert_from_item(record):
+    if isinstance(record, dict):
+        if 'S' in record.keys():
+            return record['S']
+        if 'N' in record.keys():
+            return float(record['N'])
+        d = {}
+        for key, val in record.items():
+            d[key] = convert_from_item(val)
+        return d
+    if isinstance(record, list):
+        return [convert_from_item(record_item) for record_item in record]
+    else:
+        raise ValueError(f'Unsupported type: {type(record)}')
+    
 def put_record(record, table):
     db_client = boto3.client('dynamodb')
     item = {}

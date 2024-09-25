@@ -23,6 +23,8 @@ resource "aws_dynamodb_table" "dpd_active_calls" {
     name = "dpd_active_calls"
     read_capacity = 1
     write_capacity = 1
+    stream_enabled = true
+    stream_view_type = "NEW_IMAGE"
     attribute {
       name = "call_id"
       type = "S"

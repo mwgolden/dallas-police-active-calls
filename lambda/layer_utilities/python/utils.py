@@ -24,7 +24,7 @@ def to_byte_array(data, headers):
     for item in data:
         row = []
         for header in headers:
-            row = row + [item.get(header) if item.get(header) is not None else "" ]
+            row = row + [str(item.get(header)) if item.get(header) is not None else "" ]
         file = file + "|".join(row) + '\n'
     byte_array = BytesIO(file.encode('utf-8'))
     return byte_array
