@@ -6,7 +6,7 @@ resource "aws_iam_role" "lambda_role_event_handler_address" {
 resource "aws_iam_policy" "lambda_policy_event_handler_address" {
     name = "dpd_active_calls_download_event_handler_address_policy"
     path = "/"
-    description = "AWS IAM Poplicy for DPD Active Calls transformer lambda"
+    description = "AWS IAM Policy for DPD Active Calls transformer lambda"
     policy = data.aws_iam_policy_document.lambda_policy_downloader_address.json
 }
 
