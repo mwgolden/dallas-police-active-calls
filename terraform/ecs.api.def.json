@@ -1,0 +1,25 @@
+[
+    {
+        "name": "dpd-active-calls-api",
+        "image": "${account_number}.dkr.ecr.us-east-1.amazonaws.com/com.wgolden.dpd-active-calls-api:latest",
+        "essential": true,
+        "memory": 1024,
+        "cpu": 256,
+        "portMappings": [
+            {
+                "containerPort": 8000,
+                "hostPort": 8000,
+                "protocol": "tcp"
+            }
+        ],
+        "environment": [],
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "/ecs/dpd-active-calls-api-logs",
+                "awslogs-region": "us-east-1",
+                "awslogs-stream-prefix": "ecs"
+            }
+        }
+    }
+]
