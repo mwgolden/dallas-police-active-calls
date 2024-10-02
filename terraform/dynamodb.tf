@@ -4,6 +4,8 @@ resource "aws_dynamodb_table" "address_cache" {
     name = "address_cache"
     read_capacity = 1
     write_capacity = 1
+    stream_enabled = true
+    stream_view_type = "NEW_IMAGE"
     attribute {
       name = "address_id"
       type = "S"

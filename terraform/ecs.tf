@@ -136,6 +136,7 @@ resource "aws_ecs_service" "api_service" {
   task_definition = aws_ecs_task_definition.dpd_active_calls_api.arn
   desired_count = 1
   launch_type =  "FARGATE"
+  enable_ecs_managed_tags = true
 
   network_configuration {
     subnets = [ aws_subnet.subnet.id ]

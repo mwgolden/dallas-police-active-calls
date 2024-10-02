@@ -33,7 +33,9 @@ resource "aws_lambda_function" "dpd_active_calls_dynamodb_updates_lambda" {
     environment {
         variables = {
             BUCKET_NAME = "com.wgolden.dallas-police-active-calls",
-            FOLDER = "updates/active_calls",
+            CALLS_FOLDER = "updates/active_calls",
+            ADDRESS_FOLDER = "updates/locations",
+            EVENT_URL = "http://<ip>:8000/events/"
         }
     }
     layers = [ "${aws_lambda_layer_version.utils.arn}", "${aws_lambda_layer_version.dynamodb_utils.arn}" ]
@@ -41,6 +43,19 @@ resource "aws_lambda_function" "dpd_active_calls_dynamodb_updates_lambda" {
 
 resource "aws_lambda_event_source_mapping" "lambda_dynamodb" {
   event_source_arn  = aws_dynamodb_table.dpd_active_calls.stream_arn
+  function_name     = aws_lambda_function.dpd_active_calls_dynamodb_updates_lambda.arn
+  starting_position = "LATEST"
+  filter_criteria {
+    filter {
+      pattern = jsonencode({
+        "eventName": ["INSERT"]
+      })
+    }
+  }
+}
+
+resource "aws_lambda_event_source_mapping" "new_address_dynamodb" {
+  event_source_arn  = aws_dynamodb_table.address_cache.stream_arn
   function_name     = aws_lambda_function.dpd_active_calls_dynamodb_updates_lambda.arn
   starting_position = "LATEST"
   filter_criteria {

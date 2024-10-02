@@ -19,6 +19,12 @@ def convert_from_item(record):
             return record['S']
         if 'N' in record.keys():
             return float(record['N'])
+        if 'B' in record.keys():
+            return bool(record['B'])
+        if 'M' in record.keys():
+            return convert_from_item(record['M'])
+        if 'L' in record.keys():
+            return convert_from_item(record['L'])
         d = {}
         for key, val in record.items():
             d[key] = convert_from_item(val)

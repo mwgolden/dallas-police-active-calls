@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "lambda_policy_dynamodb_updates" {
     statement {
       effect = "Allow"
       actions = ["lambda:InvokeFunction"]
-      resources = [ "${aws_dynamodb_table.dpd_active_calls.arn}" ]
+      resources = [ "${aws_dynamodb_table.dpd_active_calls.arn}", "${aws_dynamodb_table.address_cache.arn}" ]
     }
 
     statement {
@@ -35,6 +35,6 @@ data "aws_iam_policy_document" "lambda_policy_dynamodb_updates" {
           "dynamodb:DescribeStream",
           "dynamodb:ListStreams"
        ]
-       resources = [ "${aws_dynamodb_table.dpd_active_calls.arn}/stream/*" ]
+       resources = [ "${aws_dynamodb_table.dpd_active_calls.arn}/stream/*", "${aws_dynamodb_table.address_cache.arn}/stream/*" ]
     }
 }
