@@ -31,27 +31,32 @@ async def get_current_calls():
     call_table = ddb.Table('dpd_active_calls')
     address_cache = ddb.Table('address_cache')
 
-    response = call_table.scan(
-        FilterExpression=Attr('change_type').ne('delete')
-    )
-    calls = response['Items']
-
+    # Get calls and addresses
+    response = call_table.scan()
     address_cache_response = address_cache.scan()
-    
-    latest_calls = {}
-    addresses = {}
 
+    # get cached address data 
+    addresses = {}
     for address in address_cache_response['Items']:
         addresses[address['address_id']] = address['addresses']
 
-    for call in calls:
-        call_id = call['call_id']
-        update_date =  datetime.strptime(call['update_date'], '%Y-%m-%d %H:%M:%S')
+    # Find most recent update_date for each call_id
+    current_records = dict()
+    for item in response['Items']:
+        call_id = item['call_id']
+        update_date = datetime.strptime(item['update_date'], "%Y-%m-%d %H:%M:%S")
+        change_type = item['change_type']
+        cur = current_records.get(call_id)
+        if not cur or cur['update_date'] < update_date:
+            current_records[call_id] = {"update_date": update_date, "change_type": change_type}
 
-        if latest_calls.get('call_id') is None or update_date > datetime.strptime(latest_calls[call_id]['update_date'], '%Y-%m-%d %H:%M:%S'):
-            call['address'] = addresses.get(call['address_id'])
-            latest_calls[call_id] = call
-            
+    # Filter current_records for active calls and add address record
+    active_calls = []
+    for item in response["Items"]:
+        call_id, update_date = item["call_id"], datetime.strptime(item["update_date"], "%Y-%m-%d %H:%M:%S")
+        cur = current_records.get(call_id)
+        if cur and cur["update_date"] == update_date and cur["change_type"] != "delete":
+            item['address'] = addresses.get(item['address_id'])
+            active_calls.append(item)
 
-    latest_records_list = list(latest_calls.values())
-    return {'current_active_calls': latest_records_list}
+    return {'current_active_calls': active_calls}
