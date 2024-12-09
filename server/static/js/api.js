@@ -11,33 +11,39 @@ class Api {
         return await response.json()
     }
 
-    async getStream(endpoint) {
-        fetch(this.base_url + endpoint)
-            .then(response => {
-                const reader = response.body.getReader()
+    async subscribe_to_event_stream(endpoint) {
+        try {
+            const response = await fetch(this.base_url + endpoint)
 
-                const read = async () => {
-                    const { done, value } = await reader.read()
-                    if(done) { return } 
+            if(!response.ok){
+                throw new Error(`HTTP error: Status: ${response.status}`)
+            }
 
-                    const decoder = new TextDecoder("utf-8")
-                    const chunk = decoder.decode(value)
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder("utf-8")
 
-                    console.log(chunk)
+            while(true) {
+                const { value, done } = await reader.read()
+
+                if(done) {
+                    console.log("Stream closed by the server.")
+                    break
                 }
 
-                read()
-            })
-        .catch(error => {
-            console.error('Error: ', error)
-        })
+                const chunk = decoder.decode(value, { stream: true })
+                console.log("Received chunk: " + chunk)
+            }
+        }
+        catch (error) {
+            console.error("Error subscribing to event stream", error)
+        }
     }
 }
 
 const base_url = "/api/v1"
 const api = new Api(base_url)
 
-export function current_calls(callback) {
+export function currentCalls(callback) {
     api.get('/current-calls')
         .then(data => {
             callback(data)
@@ -45,4 +51,8 @@ export function current_calls(callback) {
         .catch(error => {
             console.error("Error fetching current calls:", error);
         });
+}
+
+export function subscribeToEvents() {
+    api.subscribe_to_event_stream('/get-events')
 }

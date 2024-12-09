@@ -4,11 +4,11 @@ class Map {
     constructor(id, config) {
         this.map = L.map(id, config)
         this.map.setView([32.7767, -96.7970], 10)
-        this.add_tile_layer_to()
+        this.add_tile_layer()
         this.highlight_neighborhoods()
     }
 
-    add_tile_layer_to() {
+    add_tile_layer() {
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: 19,
             attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>"
@@ -46,7 +46,7 @@ class Map {
                     click: function(event) {
                       //const center = layer.getBounds().getCenter()
                       //map.setView(center, 12)
-                      map.fitBounds(layer.getBounds())
+                      this.map.fitBounds(layer.getBounds())
                     } 
                   })
                 }
@@ -57,9 +57,12 @@ class Map {
 
     add_markers(addresses) {
         addresses.forEach (address => {
-            console.log(address)
-            L.marker(address.coords).addTo(this.map)
+            marker = L.marker(address.coords).addTo(this.map)
         })
+    }
+
+    add_marker(address) {
+        L.marker(address.coords).addTo(this.map)
     }
 
 }
