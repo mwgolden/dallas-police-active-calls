@@ -11,7 +11,7 @@ class Api {
         return await response.json()
     }
 
-    async subscribe_to_event_stream(endpoint) {
+    async subscribe_to_event_stream(endpoint, handler) {
         try {
             const response = await fetch(this.base_url + endpoint)
 
@@ -30,8 +30,8 @@ class Api {
                     break
                 }
 
-                const chunk = decoder.decode(value, { stream: true })
-                console.log("Received chunk: " + chunk)
+                const data = decoder.decode(value, { stream: true })
+                handler(data)
             }
         }
         catch (error) {
@@ -53,6 +53,6 @@ export function currentCalls(callback) {
         });
 }
 
-export function subscribeToEvents() {
-    api.subscribe_to_event_stream('/get-events')
+export function subscribeToEvents(handler) {
+    api.subscribe_to_event_stream('/get-events', handler)
 }

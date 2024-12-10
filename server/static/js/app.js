@@ -30,10 +30,15 @@ function app() {
         console.log(marker)
     }
 
+    function eventStreamHandler(data) {
+        console.log("in event stream handler")
+        console.log(data)
+    }
+
     function initialize() {
         try {
             currentCalls(getCurrentCalls)
-            subscribeToEvents()            
+            subscribeToEvents(eventStreamHandler)            
         }
         catch (error) {
             console.error("Error initializing application", error)
