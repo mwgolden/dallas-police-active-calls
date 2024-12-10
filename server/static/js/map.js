@@ -6,6 +6,7 @@ class Map {
         this.map.setView([32.7767, -96.7970], 10)
         this.add_tile_layer()
         this.highlight_neighborhoods()
+        this.markers = {}
     }
 
     add_tile_layer() {
@@ -32,7 +33,6 @@ class Map {
     highlight_neighborhoods() {
         this.fetch_geojson().then(data => {
             if(data) {
-              console.log("add dallas neighborhoods to map")
               L.geoJson(data, {
                 style: {
                       "color": "#698df0",
@@ -55,14 +55,33 @@ class Map {
         })
     }
 
-    add_markers(addresses) {
+    add_markers(addresses, handler) {
         addresses.forEach (address => {
-            marker = L.marker(address.coords).addTo(this.map)
+            this.add_marker(address, handler)
         })
     }
 
-    add_marker(address) {
-        L.marker(address.coords).addTo(this.map)
+    add_marker(address, handler) {
+        const address_id = address["address_id"]
+        const call_id = address["call_id"]
+        if(this.markers[address_id]) {
+            return
+        }
+        let marker = L.marker(address.coords).addTo(this.map)
+        marker.on("click", () => {
+            address = this.markers[address_id]
+            handler(address)
+        })
+        this.markers[address_id] = {"call_id": call_id, "marker": marker}
+    }
+
+    remove_marker(address_id) {
+        let markerEntry = this.markers[address_id]
+        if(markerEntry){
+            const layer = markerEntry["marker"]
+            this.map.removeLayer(layer)
+            delete this.markers[address_id]
+        }
     }
 
 }
