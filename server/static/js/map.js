@@ -64,23 +64,23 @@ class Map {
     add_marker(address, handler) {
         const address_id = address["address_id"]
         const call_id = address["call_id"]
-        if(this.markers[address_id]) {
+        if(this.markers[call_id]) {
             return
         }
         let marker = L.marker(address.coords).addTo(this.map)
         marker.on("click", () => {
-            address = this.markers[address_id]
-            handler(address)
+            const call = this.markers[call_id]
+            handler(call)
         })
-        this.markers[address_id] = {"call_id": call_id, "marker": marker}
+        this.markers[call_id] = {"call_id": call_id, "address_id": address_id, "marker": marker}
     }
 
-    remove_marker(address_id) {
-        let markerEntry = this.markers[address_id]
+    remove_marker(call_id) {
+        let markerEntry = this.markers[call_id]
         if(markerEntry){
             const layer = markerEntry["marker"]
             this.map.removeLayer(layer)
-            delete this.markers[address_id]
+            delete this.markers[call_id]
         }
     }
 
