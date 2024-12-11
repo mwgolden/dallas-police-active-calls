@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse  #type: ignore
 import boto3  #type: ignore
 import asyncio
 from datetime import datetime
+import json
 
 router = APIRouter()
 
@@ -11,7 +12,7 @@ event_queue = asyncio.Queue()
 async def event_publisher():
     while True:
         event = await event_queue.get()
-        yield f"data: {event}\n\n"
+        yield event
         await asyncio.sleep(0.1)
 
 @router.post("/events/")
