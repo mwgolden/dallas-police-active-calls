@@ -12,7 +12,7 @@ event_queue = asyncio.Queue()
 async def event_publisher():
     while True:
         event = await event_queue.get()
-        yield event
+        yield json.dumps(event)
         await asyncio.sleep(0.1)
 
 @router.post("/events/")
