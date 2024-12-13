@@ -6,6 +6,7 @@ import requests
 from datetime import datetime
 from utils import to_byte_array
 from dynamodb_utils import convert_from_item
+import json
 
 logger = logging.getLogger()
 if not logger.handlers:  # To ensure no duplicate handlers
@@ -31,7 +32,9 @@ def push_events(items):
     try:
         headers = {'Content-Type': 'application/json', 'Accept':'application/json'}
         logger.info("publish updates to api")
-        requests.post(event_url, json=items, headers=headers)
+        json_items = json.dumps(items)
+        logger.info(json_items)
+        requests.post(event_url, json=json_items, headers=headers)
     except Exception as e:
         logger.error(f"Failed to publish events to api: \n {str(e)}")
 
