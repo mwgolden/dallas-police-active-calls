@@ -1,3 +1,5 @@
+import { Call, Location } from "./calls.js"
+
 class Event {
     constructor(evt) {
         this.eventType = evt.event
@@ -12,15 +14,14 @@ export class EventStreamHandler {
         this.map = mapObject
     }
 
-    registerEventHandlerWith(aFunction) {
-        aFunction(this.eventStreamHandler)
-    }
-    
-    eventStreamHandler(streamedEvent) {
+    handleEventStream(streamedEvent) {
         try {
             const evnt = new Event(JSON.parse(streamedEvent))
             if(evnt.eventType === "call_changes") {
-                this.mergeCallEvents(evnt.data)
+                const eventCalls = evnt.data.map(item => {
+                    return new Call(item)
+                })
+                this.mergeCallEvents(eventCalls)
             }
             if(evnt.eventType === "address_changes") {
                 this.mergeAddressEvents(evnt.data)
@@ -31,32 +32,46 @@ export class EventStreamHandler {
         }
     }
 
-    mergeCallEvents(callEvents) {
-        console.log("merge call events")
-        callEvents.forEach(call => {
-            const changeType = call.change_type
+    mergeCallEvents(eventCalls) {
+        const toAdd = Array()
+        const toDelete = Array()
+        const toUpdate = Array()
+        eventCalls.forEach(call => {
+            const changeType = call.changeType
             if(changeType === "add"){
-                this.addCall(call)
+                toAdd.push(call)
             }
             if(changeType === "delete"){
-                this.deleteCall(call)
+                toDelete.push(call)
             }
             if(changeType === "update"){
-                this.updateCall(call)
+                toUpdate.push(call)
             }
+        })
+        this.deleteCalls(toDelete)
+        this.addCalls(toAdd)
+        this.updateCalls(toUpdate)
+    }
+
+    deleteCalls(deleteCalls) {
+        deleteCalls.forEach(call => {
+            const callId = call.callId
+            this.map.remove_marker(callId)
+            this.calls.deleteCall(call)
         })
     }
 
-    deleteCall(call) {
-        const callId = call.callId
-        map.remove_marker(callId)
-        this.calls.deleteCall(call)
+    addCalls(addCalls) {
+        addCalls.forEach(call => {
+            this.calls.addCall(call)
+        })
     }
 
-    addCall(call) {
-        this.calls.addCall(call)
+    updateCalls(updateCalls) {
+        updateCalls.forEach(call => {
+            this.calls.updateCall(call)
+        })
     }
-
 
     mergeAddressEvents(addressEvent) {
         console.log(addressEvent)

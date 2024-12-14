@@ -22,7 +22,7 @@ export class Call {
 
 export class Location {
     constructor(location) {
-        this.locationId = location.locationId
+        this.locationId = location.address_id
         this.coords = location.coords
     }
 }

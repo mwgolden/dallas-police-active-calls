@@ -1,5 +1,5 @@
 import { currentCalls, subscribeToEvents } from './api.js'
-import Map from './map.js'
+import { Map } from './map.js'
 import { ActiveCalls, Call, Location } from './calls.js'
 import { EventStreamHandler } from './eventStreamHandler.js'
 
@@ -15,9 +15,9 @@ function app() {
             calls.addCall(call)
             if("address" in activeCall) {
                 const address = activeCall.address
-                if(address.length > 0){
+                if(address !== null && address.length > 0){
                     const location = new Location({
-                        "locationId": activeCall.address_id,
+                        "address_id": activeCall.address_id,
                         "coords": [address[0].latitude, address[0].longitude]
                     })
                     calls.addLocation(location)
@@ -27,23 +27,22 @@ function app() {
         updateMap()
     }
 
-    function updateMap() {
-        const locations = calls.getLocations()
-        map.add_markers(locations, markerClickHandler)
-    }
-
     function markerClickHandler(marker) {
         const callId = marker["callId"]
         const call = calls.getCallById(callId)
         console.log(call)
     }
-    
+
+    function updateMap() {
+        const locations = calls.getLocations()
+        map.add_markers(locations, markerClickHandler)
+    }    
 
     function initialize() {
         try {
             currentCalls(getCurrentCalls)
             updateMap()
-            streamHandler.registerEventHandlerWith(subscribeToEvents)         
+            subscribeToEvents(streamHandler)     
         }
         catch (error) {
             console.error("Error initializing application", error)

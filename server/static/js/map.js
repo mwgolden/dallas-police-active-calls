@@ -1,6 +1,6 @@
 const GEOJSON_URL = "/static/resources/dallas.geojson"
 
-class Map {
+export class Map {
     constructor(id, config) {
         this.map = L.map(id, config)
         this.map.setView([32.7767, -96.7970], 10)
@@ -84,6 +84,5 @@ class Map {
         }
     }
 
+    
 }
-
-export default Map

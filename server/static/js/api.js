@@ -31,7 +31,7 @@ class Api {
                 }
 
                 const data = decoder.decode(value, { stream: true })
-                handler(data)
+                handler.handleEventStream(data)
             }
         }
         catch (error) {
