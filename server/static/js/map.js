@@ -55,32 +55,32 @@ class Map {
         })
     }
 
-    add_markers(addresses, handler) {
-        addresses.forEach (address => {
-            this.add_marker(address, handler)
+    add_markers(locations, handler) {
+        locations.forEach (location => {
+            this.add_marker(location, handler)
         })
     }
 
-    add_marker(address, handler) {
-        const address_id = address["address_id"]
-        const call_id = address["call_id"]
-        if(this.markers[call_id]) {
+    add_marker(location, handler) {
+        const locationId = location["locationId"]
+        const callId = location["callId"]
+        if(this.markers[callId]) {
             return
         }
-        let marker = L.marker(address.coords).addTo(this.map)
+        let marker = L.marker(location.coords).addTo(this.map)
         marker.on("click", () => {
-            const call = this.markers[call_id]
+            const call = this.markers[callId]
             handler(call)
         })
-        this.markers[call_id] = {"call_id": call_id, "address_id": address_id, "marker": marker}
+        this.markers[callId] = {"callId": callId, "locationId": locationId, "marker": marker}
     }
 
-    remove_marker(call_id) {
-        let markerEntry = this.markers[call_id]
+    remove_marker(callId) {
+        let markerEntry = this.markers[callId]
         if(markerEntry){
             const layer = markerEntry["marker"]
             this.map.removeLayer(layer)
-            delete this.markers[call_id]
+            delete this.markers[callId]
         }
     }
 
