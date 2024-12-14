@@ -24,8 +24,16 @@ export class EventStreamHandler {
                 this.mergeCallEvents(eventCalls)
             }
             if(evnt.eventType === "address_changes") {
-                this.mergeAddressEvents(evnt.data)
+                const eventLocations = evnt.data.map(item => {
+                    const address = item.addresses[0]
+                    return new Location({
+                        "address_id": item.address_id,
+                        "coords": [address.latitude, address.longitude]
+                    })
+                })
+                this.mergeLocationEvents(eventLocations)
             }
+            this.updateMap()
         }
         catch (error) {
             console.error("Error parsing JSON string: ", error)
@@ -73,7 +81,18 @@ export class EventStreamHandler {
         })
     }
 
-    mergeAddressEvents(addressEvent) {
-        console.log(addressEvent)
+    mergeLocationEvents(locationEvent) {
+        locationEvent.forEach(location => {
+            this.calls.addLocation(location)
+        })
+    }
+
+    updateMap() {
+        const locations = this.calls.getLocations()
+        this.map.add_markers(locations, (marker) => {
+            const callId = marker["callId"]
+            const call = this.calls.getCallById(callId)
+            console.log(call)
+        })
     }
 }
