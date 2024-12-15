@@ -16,7 +16,9 @@ export class EventStreamHandler {
 
     handleEventStream(streamedEvent) {
         try {
-            const evnt = new Event(JSON.parse(streamedEvent))
+            console.log("streamed event: ", streamedEvent)
+            console.log("streamed event type: ", typeof streamedEvent)
+            const evnt = new Event(streamedEvent)
             if(evnt.eventType === "call_changes") {
                 const eventCalls = evnt.data.map(item => {
                     return new Call(item)

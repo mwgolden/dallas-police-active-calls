@@ -22,6 +22,8 @@ class Api {
             const reader = response.body.getReader()
             const decoder = new TextDecoder("utf-8")
 
+            let buffer = ''
+
             while(true) {
                 const { value, done } = await reader.read()
 
@@ -30,9 +32,20 @@ class Api {
                     break
                 }
 
-                const data = decoder.decode(value, { stream: true })
-                handler.handleEventStream(data)
-            }
+                buffer += decoder.decode(value, { stream: true })
+                let bookmark = 0
+                while(bookmark < buffer.length) {
+                    try {
+                        const parsedEvent = JSON.parse(buffer.slice(bookmark))
+                        handler.handleEventStream(parsedEvent)
+                        bookmark = buffer.lastIndexOf('}') + 1
+                    }
+                    catch (error) {
+                        break;
+                    }
+                }
+                buffer = buffer.slice(bookmark)                
+            } 
         }
         catch (error) {
             console.error("Error subscribing to event stream", error)

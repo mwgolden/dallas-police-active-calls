@@ -34,7 +34,7 @@ def push_events(items):
         logger.info("publish updates to api")
         json_items = json.dumps(items)
         logger.info(json_items)
-        requests.post(event_url, json=json_items, headers=headers)
+        requests.post(event_url, json=items, headers=headers)
     except Exception as e:
         logger.error(f"Failed to publish events to api: \n {str(e)}")
 
