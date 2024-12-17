@@ -30,13 +30,33 @@ function app() {
     function markerClickHandler(marker) {
         const callId = marker["callId"]
         const call = calls.getCallById(callId)
+        setCallDetails(call)
         console.log(call)
     }
 
     function updateMap() {
         const locations = calls.getLocations()
         map.add_markers(locations, markerClickHandler)
-    }    
+    }
+    
+    function setCallDetails(call) {
+        const container = document.getElementById("call-detail")
+        const card = `<div class="card">
+                            <div class="card-header">
+                                <b>${call.incidentNumber} | ${call.natureOfCall}</b>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Location: ${call.location}</p>
+                                <p class="card-text">Datetime: ${call.date}}</p>
+                                <p class="card-text">Division: ${call.division}</p>
+                                <p class="card-text">Priority: ${call.priority}</p>
+                                <p class="card-text">Reporting Area: ${call.reportingArea}</p>
+                                <p class="card-text">Status: ${call.status}</p>
+                                <p class="card-text">Unit: ${call.unitNumber}</p>
+                            </div>
+                        </div>`
+        container.innerHTML = card
+    }
 
     function initialize() {
         try {
