@@ -38,21 +38,38 @@ function app() {
         const locations = calls.getLocations()
         map.add_markers(locations, markerClickHandler)
     }
+
+    function formatDate(DateString) {
+        const date = new Date(DateString)
+        const formattedDate = date.toLocaleDateString('en-US', 
+            {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }
+        )
+        return formattedDate
+    }
+
+    function toTitleCase(str) {
+        return str
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase + word.slice(1))
+            .join(' ')
+    }
     
     function setCallDetails(call) {
         const container = document.getElementById("call-detail")
+        const formattedDate = formatDate(call.date)
+        const titleCaseLocation = toTitleCase(call.location)
         const card = `<div class="card">
                             <div class="card-header">
                                 <b>${call.incidentNumber} | ${call.natureOfCall}</b>
                             </div>
                             <div class="card-body">
-                                <p class="card-text">Location: ${call.location}</p>
-                                <p class="card-text">Datetime: ${call.date}}</p>
-                                <p class="card-text">Division: ${call.division}</p>
-                                <p class="card-text">Priority: ${call.priority}</p>
-                                <p class="card-text">Reporting Area: ${call.reportingArea}</p>
-                                <p class="card-text">Status: ${call.status}</p>
-                                <p class="card-text">Unit: ${call.unitNumber}</p>
+                                <p class=card-text">
+                                    On ${formattedDate}, at ${call.block === undefined ? "" : call.block } ${call.location} in the ${call.division} division, unit ${call.unitNumber} responded to a Priority ${call.priority} incident in Reporting Area ${call.reportingArea}. The status is currently "${call.status}."
+                                </p>
                             </div>
                         </div>`
         container.innerHTML = card

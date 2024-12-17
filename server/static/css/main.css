@@ -1,3 +1,5 @@
 body { background-color: #FFFAFA; }
 
 #map { height: 500px; }
+
+.card-header { text-align: center; }
