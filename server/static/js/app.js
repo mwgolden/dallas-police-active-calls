@@ -28,16 +28,14 @@ function app() {
         updateMap()
     }
 
-    function markerClickHandler(marker) {
-        const callId = marker["callId"]
-        const call = calls.getCallById(callId)
-        setCallDetails(call)
-        console.log(call)
-    }
-
     function updateMap() {
         const locations = calls.getLocations()
-        map.add_markers(locations, markerClickHandler)
+        map.add_markers(locations, (marker) => {
+            const callId = marker["callId"]
+            const call = calls.getCallById(callId)
+            setCallDetails(call)
+            console.log(call)
+        })
     }
 
     function initialize() {

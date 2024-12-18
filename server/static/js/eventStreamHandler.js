@@ -1,4 +1,5 @@
 import { Call, Location } from "./calls.js"
+import { setCallDetails } from "./templates.js"
 
 class Event {
     constructor(evt) {
@@ -94,6 +95,7 @@ export class EventStreamHandler {
         this.map.add_markers(locations, (marker) => {
             const callId = marker["callId"]
             const call = this.calls.getCallById(callId)
+            setCallDetails(call)
             console.log(call)
         })
     }
