@@ -2,6 +2,7 @@ import { currentCalls, subscribeToEvents } from './api.js'
 import { Map } from './map.js'
 import { ActiveCalls, Call, Location } from './calls.js'
 import { EventStreamHandler } from './eventStreamHandler.js'
+import { formatDate, toTitleCase } from './utils.js'
 
 
 function app() {
@@ -37,25 +38,6 @@ function app() {
     function updateMap() {
         const locations = calls.getLocations()
         map.add_markers(locations, markerClickHandler)
-    }
-
-    function formatDate(DateString) {
-        const date = new Date(DateString)
-        const formattedDate = date.toLocaleDateString('en-US', 
-            {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            }
-        )
-        return formattedDate
-    }
-
-    function toTitleCase(str) {
-        return str
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase + word.slice(1))
-            .join(' ')
     }
     
     function setCallDetails(call) {
