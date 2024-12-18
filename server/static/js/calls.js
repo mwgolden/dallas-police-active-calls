@@ -96,4 +96,36 @@ export class ActiveCalls {
         }
         return locs
     }
+
+    static fromApi(data) {
+        const activeCalls = new ActiveCalls()
+        data.current_active_calls.forEach(activeCall => {
+            const call = new Call(activeCall)
+            activeCalls.addCall(call)
+            if("address" in activeCall) {
+                const address = activeCall.address
+                if(address !== null && address.length > 0){
+                    const location = new Location({
+                        "address_id": activeCall.address_id,
+                        "coords": [address[0].latitude, address[0].longitude]
+                    })
+                    activeCalls.addLocation(location)
+                }
+            }
+        })
+        return activeCalls
+    }
+    
+    merge(currentActiveCalls) {
+        const currentCalls = currentActiveCalls.calls
+        const currentLocations = currentActiveCalls.locations
+
+        for(const callId in currentCalls) {
+            this.addCall(currentCalls[callId])
+        }
+
+        for(const locationId in currentLocations) {
+            this.addLocation(currentLocations[locationId])
+        }
+    }
 }
