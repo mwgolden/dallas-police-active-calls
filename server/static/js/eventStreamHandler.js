@@ -91,12 +91,6 @@ export class EventStreamHandler {
     }
 
     updateMap() {
-        const locations = this.calls.getLocations()
-        this.map.add_markers(locations, (marker) => {
-            const callId = marker["callId"]
-            const call = this.calls.getCallById(callId)
-            setCallDetails(call)
-            console.log(call)
-        })
+        this.map.updateMapMarkers(this.calls, setCallDetails)
     }
 }

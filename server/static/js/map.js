@@ -44,8 +44,6 @@ export class Map {
                                    {permanent: false, className: "label"}),
                   layer.on({
                     click: function(event) {
-                      //const center = layer.getBounds().getCenter()
-                      //map.setView(center, 12)
                       this.map.fitBounds(layer.getBounds())
                     } 
                   })
@@ -84,5 +82,13 @@ export class Map {
         }
     }
 
-    
+    updateMapMarkers(calls, setCallDetailsCallback) {
+        const locations = calls.getLocations()
+        this.add_markers(locations, (marker) => {
+            const callId = marker["callId"]
+            const call = calls.getCallById(callId)
+            setCallDetailsCallback(call)
+            console.log(call)
+        })
+    }
 }

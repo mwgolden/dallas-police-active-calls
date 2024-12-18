@@ -25,23 +25,12 @@ function app() {
                 }
             }
         })
-        updateMap()
-    }
-
-    function updateMap() {
-        const locations = calls.getLocations()
-        map.add_markers(locations, (marker) => {
-            const callId = marker["callId"]
-            const call = calls.getCallById(callId)
-            setCallDetails(call)
-            console.log(call)
-        })
+        map.updateMapMarkers(calls, setCallDetails)
     }
 
     function initialize() {
         try {
             currentCalls(getCurrentCalls)
-            updateMap()
             subscribeToEvents(streamHandler)     
         }
         catch (error) {
