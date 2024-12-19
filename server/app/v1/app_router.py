@@ -7,3 +7,8 @@ router = APIRouter()
 async def home():
     with open("./static/index.html") as f:
         return f.read()
+    
+@router.get("/about", response_class=HTMLResponse)
+async def home():
+    with open("./static/about.html") as f:
+        return f.read()
