@@ -1,39 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About DPD Active Calls</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
+
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
     <div class="container">
-      <!-- Navbar -->
-       <nav  class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link active" href="/">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/about">About</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="https://github.com/mwgolden/dallas-police-active-calls">Github</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="https://dev.wgolden.blog/">Blog</a>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/mwgolden/dallas-police-active-calls">Github</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/in/mwgolden/">LinkedIn</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://dev.wgolden.blog/">Blog</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </nav>
     </div>
-    <h1>About</h1>
+    <div class="container">
+        <div id="about-me" class="row">
+            <div class="col mt-3">
+                <h3>About Me</h3>
+                <p>
+                    I'm Matthew, a lifelong learner and data engineer based in Texas. I have nearly 20 years of experience in IT. My career spans diverse roles, including security administration, application support, ETL development, and Web/API development. I bring a versatile skill set and a passion for solving complex challenges through innovative data solutions.
+                </p>
+            </div>
+        </div>
+        <div id="about-project" class="row">
+            <div class="col mt-3">
+                <p>
+                    This project is a synthesis of ongoing efforts to hone my data engineering skills with a focus on AWS cloud technologies and terraform.
+                    Like any endeavor, it is a work in progress, always.  
+                </p>
+                <h3>Dallas Police Active Calls</h3>
+                <p>
+                    The city of Dallas provides a real-time snapshot of active police calls on <a href="https://www.dallasopendata.com/Public-Safety/Dallas-Police-Active-Calls/9fxf-t2tr/about_data" class="href">Dallas Open Data</a>.
+                    The published data set shows a block, location, nature of call, etc. for current active calls. It is updated every two minutes.
+                     These are calls where the unit assigned to the call has arrived and is currently working the call. Calls for service that are not releaseable due to privacy laws are not included. 
+                    </p>
+                <p>
+                    The primary objective of this project is to capture these events in real-time and display them on a map of the city of Dallas. 
+                    The map should automatically update as new calls are arrive, and older calls fall off. Server side events will deliver these updates to the front end. 
+                </p>
+                <p>
+                    Instead of geographic coordinates, the source data set provides an optional block field, and a location which may be a cross-street or actual address. 
+                    In order to visualize these calls on a map, lattitude and longitude will be determined by forward geocoding location information. 
+                    The project will: 
+                    <ul>
+                        <li>Capture real-time active calls from the Dallas Open Data API</li>
+                        <li>Track changes between API calls, integrating new, updated, and removed records into a local dataset.</li>
+                        <li>Enrich call data by forward geocoding location information.</li>
+                        <li>Persist updates to Amazon S3 for historical reference.</li>
+                        <li>Publish these updates via an API endpoint using Server-Sent Events (SSE).</li>
+                        <li>Use Terraform to manage and provision project infrastructure.</li>
+                    </ul>
+                </p>
+                <h4>The Data Pipeline</h4>
+                <p>The data pipeline is an event-driven workflow triggered when a new json file is downloaded from Dallas Open Data.</p>
+                <p>The workflow is divided into parallel branches. One branch for identifies additions, updates and deletions by comparing the current Open Data API response with the previous api response.
+                     Another branch attempts to forward geocode the call's location information. Calls and geographic data are cached in dynamodb. 
+                     Dynamodb streams are utilized to push updates an API and persist updates in s3 for further analysis. Calls and Address event are synthesized on the front end.
+                </p>
+                <img src="/static/resources/data-pipeline.png" alt="data pipeline worflow">
+                <p>
+                    <ol>
+                        <li>A lambda function downloads the current snapshot of active calls from Dallas Open Data, and saves the raw json to an s3 bucket based on an eventbridge schedule.</li>
+                        <li>The downloaded file emits an s3:ObjectCreated:Put event.</li>
+                        <li>The s3 event is published to an SNS topic.</li>
+                        <li>The SNS topic feeds the event to parallel processes that track call changes and forward geocode location data.</li>
+                        <li>Location information and active calls data are written to separate dynamodb tables.</li>
+                        <li>Dynamodb streams send updates to a lambda function.</li>
+                        <li>The lambda function receiving streamed updates persists changes to s3, and publishes address data and call updates as Server-Sent events to an API.</li>
+                    </ol>
+                </p>
+                <h4>The API</h4>
+                <p>The API prototype was built using python's FastAPI framework. It runs in a docker container hosted on AWS' Elastic Container Service (ECS). Its methods allow fetching the most recent active calls with enriched location details, and streaming real-time updates to the client. When a new client connects, it will download all current calls, and then subscribe to /get-events/ to receive streaming updates for calls and address information.</p>
+                <ol>
+                    <li>
+                        Event Queue for Real-Time Updates:
+                        <ul>
+                            <li>
+                                An event queue manages incoming events.
+                            </li>
+                            <li>
+                                The event_publisher function continuously yields events from the queue, which are streamed to connected clients via the /get-events/ endpoint using the SSE protocol.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Event Publishing:
+                        <ul>
+                            <li>
+                                The /events/ POST endpoint receives JSON payloads from dynamodb streams and puts them into the event queue for processing.
+                            </li>
+                            <li>
+                                Clients subscribe to updates by connecting to the /get-events/ endpoint, which streams events using the StreamingResponse class.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Current Calls Retrieval:
+                        <ul>
+                            <li>
+                                The /current-calls/ endpoint retrieves current active calls from two dynamodb tables:
+                                    dpd_active_calls for call data.
+                                    address_cache for associated addresses.
+                            </li>
+                            <li>
+                                The endpoint returns the latest updates for each call or newly processed address data
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>
