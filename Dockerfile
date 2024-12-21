@@ -1,6 +1,10 @@
 # Use a Python base image
 FROM python:3.12-slim
 
+# Set environment
+ARG ENVIRONMENT
+ENV ENV=$ENVIRONMENT
+
 # Set the working directory
 WORKDIR /app
 
