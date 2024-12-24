@@ -1,6 +1,6 @@
 [
     {
-        "name": "dpd-active-calls-api",
+        "name": "${ecs_container_name}",
         "image": "${account_number}.dkr.ecr.us-east-1.amazonaws.com/com.wgolden.dpd-active-calls-api:latest",
         "essential": true,
         "memory": 1024,
