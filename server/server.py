@@ -3,6 +3,8 @@ from fastapi.staticfiles import StaticFiles #type: ignore
 from app.v1 import app_router
 from api.v1 import active_calls_router
 import os
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 ENVIRONMENT = os.environ.get("ENV")
 
@@ -17,3 +19,12 @@ def run():
     return app
 
 app = run()
+
+# Middleware to handle X-Forwarded-Proto
+@app.middleware("http")
+async def https_redirect(request, call_next):
+    # Check if the original request was HTTPS (using X-Forwarded-Proto)
+    if request.headers.get("x-forwarded-proto") == "https":
+        request.scope["scheme"] = "https"
+    response = await call_next(request)
+    return response 
