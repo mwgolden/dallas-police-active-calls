@@ -4,6 +4,7 @@ import boto3  #type: ignore
 import asyncio
 from datetime import datetime
 import json
+from api.v1.rate_limiter import limiter
 
 router = APIRouter()
 
@@ -26,7 +27,8 @@ async def get_events():
     return StreamingResponse(event_publisher(), media_type="text/event-stream")
 
 @router.get("/current-calls/")
-async def get_current_calls():
+@limiter.limit("3/minute")
+async def get_current_calls(request: Request):
     ddb = boto3.resource('dynamodb')
     call_table = ddb.Table('dpd_active_calls')
     address_cache = ddb.Table('address_cache')
