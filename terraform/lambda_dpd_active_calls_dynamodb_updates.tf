@@ -6,7 +6,7 @@ resource "aws_iam_role" "lambda_role_dynamodb_updates" {
 resource "aws_iam_policy" "lambda_policy_dynamodb_updates" {
     name = "dpd_active_calls_dynamodb_updates_policy"
     path = "/"
-    description = "AWS IAM Poplicy for DPD Active Calls dynamodb updates lambda"
+    description = "AWS IAM Policy for DPD Active Calls dynamodb updates lambda"
     policy = data.aws_iam_policy_document.lambda_policy_dynamodb_updates.json
 }
 
@@ -35,7 +35,7 @@ resource "aws_lambda_function" "dpd_active_calls_dynamodb_updates_lambda" {
             BUCKET_NAME = "com.wgolden.dallas-police-active-calls",
             CALLS_FOLDER = "updates/active_calls",
             ADDRESS_FOLDER = "updates/locations",
-            EVENT_URL = "http://${aws_lb.dpd_active_calls_lb.dns_name}/api/v1/events/"
+            EVENT_URL = "https://${aws_lb.dpd_active_calls_lb.dns_name}/api/v1/events/"
         }
     }
     layers = [ "${aws_lambda_layer_version.utils.arn}", "${aws_lambda_layer_version.dynamodb_utils.arn}" ]
