@@ -70,7 +70,7 @@ resource "aws_ecs_task_definition" "dpd_active_calls_api" {
         "${path.module}/ecs.api.def.json", 
         { 
             account_number = data.aws_caller_identity.account.account_id 
-            ecs_container_name = local.ecs_container_name
+            ecs_container_name = var.ecs_container_name
         })
     execution_role_arn = aws_iam_role.ecs_role.arn
     task_role_arn = aws_iam_role.ecs_role.arn
@@ -93,7 +93,7 @@ resource "aws_ecs_service" "api_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.dpd_active_calls_target_group.arn
-    container_name = local.ecs_container_name
+    container_name = var.ecs_container_name
     container_port = 8000
   }
 }

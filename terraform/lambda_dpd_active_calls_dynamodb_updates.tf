@@ -35,7 +35,7 @@ resource "aws_lambda_function" "dpd_active_calls_dynamodb_updates_lambda" {
             BUCKET_NAME = "com.wgolden.dallas-police-active-calls",
             CALLS_FOLDER = "updates/active_calls",
             ADDRESS_FOLDER = "updates/locations",
-            EVENT_URL = "https://${aws_lb.dpd_active_calls_lb.dns_name}/api/v1/events/"
+            EVENT_URL = ""
         }
     }
     layers = [ "${aws_lambda_layer_version.utils.arn}", "${aws_lambda_layer_version.dynamodb_utils.arn}" ]
