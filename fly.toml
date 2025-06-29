@@ -1,0 +1,24 @@
+# fly.toml app configuration file generated for dallas-police-active-calls on 2025-06-29T13:54:04-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'dallas-police-active-calls'
+primary_region = 'dfw'
+
+[env]
+  DPD_CURRENT_CALLS_URL = "https://vf5u6q90ne.execute-api.us-east-1.amazonaws.com/prod/current_calls"
+  ENV = "production"
+
+[build]
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'

@@ -1,0 +1,226 @@
+# flyctl launch added from .pytest_cache/.gitignore
+# Created by pytest automatically.
+.pytest_cache/**/*
+
+# flyctl launch added from lambda/.gitignore
+# Byte-compiled / optimized / DLL files
+lambda/**/__pycache__
+lambda/**/*.py[cod]
+lambda/**/*$py.class
+
+# C extensions
+lambda/**/*.so
+
+# Distribution / packaging
+lambda/**/.Python
+lambda/**/build
+lambda/**/deploy
+lambda/**/develop-eggs
+lambda/**/dist
+lambda/**/downloads
+lambda/**/eggs
+lambda/**/.eggs
+lambda/**/lib
+lambda/**/lib64
+lambda/**/parts
+lambda/**/sdist
+lambda/**/var
+lambda/**/wheels
+lambda/**/share/python-wheels
+lambda/**/*.egg-info
+lambda/**/.installed.cfg
+lambda/**/*.egg
+lambda/**/MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+lambda/**/*.manifest
+lambda/**/*.spec
+
+# Installer logs
+lambda/**/pip-log.txt
+lambda/**/pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+lambda/**/htmlcov
+lambda/**/.tox
+lambda/**/.nox
+lambda/**/.coverage
+lambda/**/.coverage.*
+lambda/**/.cache
+lambda/**/nosetests.xml
+lambda/**/coverage.xml
+lambda/**/*.cover
+lambda/**/*.py,cover
+lambda/**/.hypothesis
+lambda/**/.pytest_cache
+lambda/**/cover
+
+# Translations
+lambda/**/*.mo
+lambda/**/*.pot
+
+# Django stuff:
+lambda/**/*.log
+lambda/**/local_settings.py
+lambda/**/db.sqlite3
+lambda/**/db.sqlite3-journal
+
+# Flask stuff:
+lambda/**/instance
+lambda/**/.webassets-cache
+
+# Scrapy stuff:
+lambda/**/.scrapy
+
+# Sphinx documentation
+lambda/**/docs/_build
+
+# PyBuilder
+lambda/**/.pybuilder
+lambda/**/target
+
+# Jupyter Notebook
+lambda/**/.ipynb_checkpoints
+
+# IPython
+lambda/**/profile_default
+lambda/**/ipython_config.py
+
+# pyenv
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+#poetry.lock
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#pdm.lock
+#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
+#   in version control.
+#   https://pdm.fming.dev/latest/usage/project/#working-with-version-control
+lambda/**/.pdm.toml
+lambda/**/.pdm-python
+lambda/**/.pdm-build
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+lambda/**/__pypackages__
+
+# Celery stuff
+lambda/**/celerybeat-schedule
+lambda/**/celerybeat.pid
+
+# SageMath parsed files
+lambda/**/*.sage.py
+
+# Environments
+lambda/**/.env
+lambda/**/.venv
+lambda/**/env
+lambda/**/venv
+lambda/**/ENV
+lambda/**/env.bak
+lambda/**/venv.bak
+lambda/**/*.env
+
+# Spyder project settings
+lambda/**/.spyderproject
+lambda/**/.spyproject
+
+# Rope project settings
+lambda/**/.ropeproject
+
+# mkdocs documentation
+lambda/site
+
+# mypy
+lambda/**/.mypy_cache
+lambda/**/.dmypy.json
+lambda/**/dmypy.json
+
+# Pyre type checker
+lambda/**/.pyre
+
+# pytype static type analyzer
+lambda/**/.pytype
+
+# Cython debug symbols
+lambda/**/cython_debug
+
+# PyCharm
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+#.idea/
+
+lambda/**/.terraform
+lambda/**/.terraform/*
+
+# flyctl launch added from lambda/.pytest_cache/.gitignore
+# Created by pytest automatically.
+lambda/.pytest_cache/**/*
+
+# flyctl launch added from lambda/tests/.pytest_cache/.gitignore
+# Created by pytest automatically.
+lambda/tests/.pytest_cache/**/*
+
+# flyctl launch added from server/.gitignore
+server/**/__pycache__
+server/**/env
+server/**/.env
+
+# flyctl launch added from terraform/.gitignore
+# Local .terraform directories
+terraform/**/**/.terraform/*
+
+# .tfstate files
+terraform/**/*.tfstate
+terraform/**/*.tfstate.*
+
+# Crash log files
+terraform/**/crash.log
+terraform/**/crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data, such as
+# password, private keys, and other secrets. These should not be part of version 
+# control as they are data points which are potentially sensitive and subject 
+# to change depending on the environment.
+terraform/**/*.tfvars
+terraform/**/*.tfvars.json
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+terraform/**/override.tf
+terraform/**/override.tf.json
+terraform/**/*_override.tf
+terraform/**/*_override.tf.json
+
+# Ignore transient lock info files created by terraform apply
+terraform/**/.terraform.tfstate.lock.info
+terraform/**/.terraform.lock.hcl
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+# example: *tfplan*
+
+# Ignore CLI configuration files
+terraform/**/.terraformrc
+terraform/**/terraform.rc
+fly.toml

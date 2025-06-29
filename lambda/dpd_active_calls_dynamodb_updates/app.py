@@ -18,6 +18,11 @@ calls_bucket_key = os.getenv("CALLS_FOLDER")
 address_bucket_key = os.getenv("ADDRESS_FOLDER")
 event_url = os.getenv("EVENT_URL")
 
+def get_api_key():
+    ssm = boto3.client("ssm")
+    param = ssm.get_parameter(Name="/dallas_active_calls/api_key", WithDecryption=True)
+    return param["Parameter"]["Value"]
+
 def write_to_s3(bytes, bucket, key):
     try:
         s3_client = boto3.client('s3')
@@ -30,7 +35,8 @@ def write_to_s3(bytes, bucket, key):
 
 def push_events(items):
     try:
-        headers = {'Content-Type': 'application/json', 'Accept':'application/json'}
+        api_key = get_api_key()
+        headers = {'Content-Type': 'application/json', 'Accept':'application/json', 'X-Api-Key': api_key}
         logger.info("publish updates to api")
         json_items = json.dumps(items)
         logger.info(json_items)
