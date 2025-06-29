@@ -2,23 +2,29 @@ from fastapi import FastAPI #type: ignore
 from fastapi.staticfiles import StaticFiles #type: ignore
 from app.v1 import app_router
 from api.v1 import active_calls_router
+from police_calls import active_calls
 import os
-from starlette.middleware.trustedhost import TrustedHostMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
 ENVIRONMENT = os.environ.get("ENV")
+
+# cache active calls
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await active_calls.cache_calls()
+    yield
 
 def configure_static_files(app):
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def run():
     if ENVIRONMENT == "production":
-        app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+        app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
     else:
         load_dotenv()
-        app = FastAPI()
-
+        app = FastAPI(lifespan=lifespan)
+    
     configure_static_files(app)
     app.include_router(router=app_router.router)
     app.include_router(router=active_calls_router.router, prefix="/api/v1")

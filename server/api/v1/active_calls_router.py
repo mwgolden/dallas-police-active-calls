@@ -4,7 +4,7 @@ import os
 import asyncio
 import json
 from api.v1.rate_limiter import limiter
-import httpx
+from police_calls import active_calls
 
 router = APIRouter()
 
@@ -28,10 +28,6 @@ async def get_events():
 
 @router.get("/current-calls/")
 @limiter.limit("3/minute")
-async def get_current_calls(request: Request):
-    api_key = os.getenv("DPD_ACTIVE_CALLS_API_KEY")
-    URL = os.getenv("DPD_CURRENT_CALLS_URL")
-    headers = {"X-API-Key": api_key}
-    async with httpx.AsyncClient() as client:
-        response = await client.get(URL, headers=headers, timeout=None)
-        return response.json()
+def get_current_calls(request: Request):
+    calls = active_calls.get_calls()
+    return calls
