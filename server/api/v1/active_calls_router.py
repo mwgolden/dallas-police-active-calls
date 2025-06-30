@@ -40,7 +40,7 @@ async def get_events():
     return StreamingResponse(event_publisher(), media_type="text/event-stream")
 
 @router.get("/current-calls/")
-@limiter.limit("3/minute")
-def get_current_calls(request: Request):
-    calls = active_calls.get_calls()
+@limiter.limit("3/second")
+async def get_current_calls(request: Request):
+    calls = await active_calls.get_calls()
     return calls
