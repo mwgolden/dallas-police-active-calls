@@ -6,14 +6,21 @@ from police_calls import active_calls
 import os
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 
 ENVIRONMENT = os.environ.get("ENV")
+
+scheduler = BackgroundScheduler()
 
 # cache active calls
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await active_calls.cache_calls()
+    scheduler.add_job(active_calls.cache_calls, IntervalTrigger(minutes=10))
+    scheduler.start()
     yield
+    scheduler.shutdown()
 
 def configure_static_files(app):
     app.mount("/static", StaticFiles(directory="static"), name="static")
