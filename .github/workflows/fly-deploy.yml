@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - main
+    paths: 
+      - 'server/**'
+      - 'Dockerfile'
+      - 'fly.toml'
 jobs:
   deploy:
     name: Deploy app
