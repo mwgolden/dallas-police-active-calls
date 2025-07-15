@@ -88,7 +88,7 @@
                     </ol>
                 </p>
                 <h4>The API</h4>
-                <p>The API prototype was built using python's FastAPI framework. It runs in a docker container hosted on AWS' Elastic Container Service (ECS). Its methods allow fetching the most recent active calls with enriched location details, and streaming real-time updates to the client. When a new client connects, it will download all current calls, and then subscribe to /get-events/ to receive streaming updates for calls and address information.</p>
+                <p>The API prototype was built using python's FastAPI framework. It runs in a docker container hosted fly.io. Its methods allow fetching the most recent active calls with enriched location details, and streaming real-time updates to the client. When a new client connects, it will download all current calls, and then subscribe to /get-events/ to receive streaming updates for calls and address information.</p>
                 <ol>
                     <li>
                         Event Queue for Real-Time Updates:
