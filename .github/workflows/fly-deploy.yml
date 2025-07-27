@@ -2,7 +2,7 @@
 
 name: Fly Deploy
 on:
-  workflow_dispath:
+  workflow_dispatch:
 permissions:
   id-token: write
   contents: read
