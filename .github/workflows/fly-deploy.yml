@@ -21,10 +21,7 @@ jobs:
           TOKEN=$(curl -sH "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
           "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com")
 
-          echo "Token: $TOKEN" | jq .
-
-          echo "Decoded JWT claims: "
-          echo "$TOKEN" | jq -r '.value' | cut -d '.' -f2 | base64 -d | jq .
+          echo "Token: $TOKEN" 
 
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
