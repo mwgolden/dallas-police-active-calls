@@ -22,7 +22,7 @@ jobs:
           aws-region: us-east-1 
 
       - name: Invoke Lambda
-        run | 
+        run: | 
           response=$(aws lambda invoke \
             --function-name flyctl_get_deploy_token \
             --cli-binary-format raw-in-base64-out \
