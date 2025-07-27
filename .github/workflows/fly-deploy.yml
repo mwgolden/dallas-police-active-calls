@@ -19,7 +19,7 @@ jobs:
         run: | 
           echo "Requesting github oidc token"
           TOKEN=$(curl -sH "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" )
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com")
 
           echo "Token: $TOKEN" | jq .
 
