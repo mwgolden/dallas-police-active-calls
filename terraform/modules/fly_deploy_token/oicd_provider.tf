@@ -13,14 +13,14 @@ data "aws_iam_policy_document" "github_oidc_policy" {
       identifiers = [ "${aws_iam_openid_connect_provider.github_provider.arn}" ]
     }
     condition {
-      test = "ForAnyValue:StringEquals"
+      test = "StringEquals"
       variable = "token.actions.githubusercontent.com:aud"
       values = [ "sts.amazon.com" ]
     }
     condition {
-      test = "ForAnyValue:StringEquals"
+      test = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values = [ "repo:dallas-police-active-calls/dallas-police-active-calls:ref:refs/heads/main" ]
+      values = [ "repo:mwgolden/dallas-police-active-calls:ref:refs/heads/main" ]
     }
   }
 }
