@@ -23,6 +23,9 @@ jobs:
 
           echo "Token: $TOKEN" 
 
+          echo "Decoded JWT claims:"
+          echo "$TOKEN" | jq -r '.value' | cut -d '.' -f2 | base64 -d | jq .
+
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
