@@ -29,9 +29,12 @@ jobs:
             response.json)
           echo "Raw response from AWS CLI:"
           echo "$response"
-      
-          echo "Lambda function output:"
-          cat response.json
+
+      - name: Deploy Server
+        uses: superfly/flyctl-actions/setup-flyctl@master
+        run: flyctl deploy --remote-only
+        env: 
+          FLY_API_TOKEN: cat response.json | jq -r .body
 
     
     
