@@ -15,6 +15,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -27,16 +30,13 @@ jobs:
             --function-name flyctl_get_deploy_token \
             --cli-binary-format raw-in-base64-out \
             response.json)
-          echo "Raw response from AWS CLI:"
-          echo "$response"
+          TOKEN=$(jq -r .body response.json)
+          echo FLY_API_TOKEN=$TOKEN >> $GITHUB_ENV
 
-      - name: Setup flyctl
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      
       - name: Deploy Server
-      - run: flyctl deploy --remote-only
+        run: flyctl deploy --remote-only
         env: 
-          FLY_API_TOKEN: cat response.json | jq -r .body
+          FLY_API_TOKEN: ${{ env.FLY_API_TOKEN }}
 
     
     
