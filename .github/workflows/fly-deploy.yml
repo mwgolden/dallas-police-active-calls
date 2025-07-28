@@ -2,7 +2,13 @@
 
 name: Fly Deploy
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths: 
+      - 'server/**'
+      - 'Dockerfile'
+      - 'fly.toml'
 permissions:
   id-token: write
   contents: read
