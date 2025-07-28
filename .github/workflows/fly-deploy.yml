@@ -30,8 +30,10 @@ jobs:
           echo "Raw response from AWS CLI:"
           echo "$response"
 
+      - name: Setup flyctl
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      
       - name: Deploy Server
-        uses: superfly/flyctl-actions/setup-flyctl@master
         run: flyctl deploy --remote-only
         env: 
           FLY_API_TOKEN: cat response.json | jq -r .body
