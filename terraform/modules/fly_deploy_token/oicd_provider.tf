@@ -15,7 +15,7 @@ data "aws_iam_policy_document" "github_oidc_policy" {
     condition {
       test = "StringEquals"
       variable = "token.actions.githubusercontent.com:aud"
-      values = [ "sts.amazon.com" ]
+      values = [ "sts.amazonaws.com" ]
     }
     condition {
       test = "StringEquals"
@@ -34,14 +34,14 @@ data "aws_iam_policy_document" "lambda_invoke" {
 }
 
 resource "aws_iam_policy" "lambda_policy" {
-    name = "github-oidc-lambda-invoke"
+    name = "gh-oidc-lambda-invoke"
     path = "/"
     description = "Grant access to invoke lambda for deployment token"
     policy = data.aws_iam_policy_document.lambda_invoke.json
 }
 
 resource "aws_iam_role" "github_oidc_lambda" {
-  name = "GithubOIDCLambdaRole"
+  name = "GHActionsOIDCLambdaRole"
   assume_role_policy = data.aws_iam_policy_document.github_oidc_policy.json
 }
 
