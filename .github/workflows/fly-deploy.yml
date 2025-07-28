@@ -34,7 +34,7 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       
       - name: Deploy Server
-        run: flyctl deploy --remote-only
+      - run: flyctl deploy --remote-only
         env: 
           FLY_API_TOKEN: cat response.json | jq -r .body
 
