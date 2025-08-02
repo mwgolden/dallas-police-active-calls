@@ -1,7 +1,7 @@
 
 resource "aws_cloudwatch_event_rule" "every_5_minutes" {
   name = "query_dpd_active_calls_every_5_minutes_rule"
-  description = "Download Dallas police active calls every two minutes"
+  description = "Download Dallas police active calls every five minutes"
   schedule_expression = "rate(5 minutes)"
 }
 

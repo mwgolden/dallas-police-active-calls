@@ -11,7 +11,7 @@ resource "aws_iam_policy" "lambda_policy_current_calls" {
 }
 
 resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_current_calls_role" {
-    role = aws_iam_role.lambda_role.name
+    role = aws_iam_role.lambda_role_current_calls.name
     policy_arn = aws_iam_policy.lambda_policy_current_calls.arn
 }
 
@@ -24,7 +24,7 @@ data "archive_file" "deploy_dpd_active_calls_current_calls" {
 resource "aws_lambda_function" "dpd_active_calls_current_calls_lambda" {
     filename = "../lambda/deploy/dpd-active-calls-current-calls.zip"
     function_name = "dpd_active_calls_current_Calls"
-    role = aws_iam_role.lambda_role.arn
+    role = aws_iam_role.lambda_role_current_calls.arn
     handler = "app.lambda_handler"
     runtime = "python3.12"
     depends_on = [ aws_iam_role_policy_attachment.attach_iam_policy_to_current_calls_role ]
