@@ -1,7 +1,7 @@
 data "archive_file" "deploy_lambda_layer_utils" {
     type = "zip"
-    source_dir = "../lambda/build/layer_utilities/"
-    output_path = "../lambda/deploy/dpd_layer_utilities.zip"
+    source_dir = var.lambda_layer_utils_archive_src_dir
+    output_path = var.lambda_layer_utils_archive_zip_dir
 }
 
 resource "aws_lambda_layer_version" "utils" {

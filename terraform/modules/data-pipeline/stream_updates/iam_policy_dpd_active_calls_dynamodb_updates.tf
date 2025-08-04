@@ -18,13 +18,13 @@ data "aws_iam_policy_document" "lambda_policy_dynamodb_updates" {
       "s3:GetObject",
       "s3:List*"
       ]
-      resources = [ "${aws_s3_bucket.police_data.arn}", "${aws_s3_bucket.police_data.arn}/*" ]
+      resources = [ "${var.police_data_bucket_arn}", "${var.police_data_bucket_arn}/*" ]
     }
 
     statement {
       effect = "Allow"
       actions = ["lambda:InvokeFunction"]
-      resources = [ "${aws_dynamodb_table.dpd_active_calls.arn}", "${aws_dynamodb_table.address_cache.arn}" ]
+      resources = [ "${var.dynamodb_dpd_active_calls_table_arn}", "${var.dynamodb_address_cache_table_arn}" ]
     }
 
     statement {
@@ -35,12 +35,12 @@ data "aws_iam_policy_document" "lambda_policy_dynamodb_updates" {
           "dynamodb:DescribeStream",
           "dynamodb:ListStreams"
        ]
-       resources = [ "${aws_dynamodb_table.dpd_active_calls.arn}/stream/*", "${aws_dynamodb_table.address_cache.arn}/stream/*" ]
+       resources = [ "${var.dynamodb_dpd_active_calls_table_arn}/stream/*", "${var.dynamodb_address_cache_table_arn}/stream/*" ]
     }
     
     statement {
       effect = "Allow"
       actions = [ "ssm:GetParameter" ]
-      resources = [ "${aws_ssm_parameter.api_key.arn}" ]
+      resources = [ "${var.outbound_api_key_param}" ]
     }
 }

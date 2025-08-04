@@ -17,13 +17,13 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_event_handler_ad
 
 data "archive_file" "deploy_dpd_active_calls_download_event_handler_address" {
     type = "zip"
-    source_dir = "../lambda/build/dpd_active_calls_download_address_handler/"
-    output_path = "../lambda/deploy/dpd-active-calls-download-address-handler.zip"
+    source_dir = var.lambda_download_handler_src_dir
+    output_path = var.lambda_download_handler_zip_dir
 }
 
 
 resource "aws_lambda_function" "dpd_active_calls_download_event_handler_address_lambda" {
-    filename = "../lambda/deploy/dpd-active-calls-download-address-handler.zip"
+    filename = var.lambda_download_handler_zip_dir
     function_name = "dpd_active_calls_download_event_handler_address"
     role = aws_iam_role.lambda_role_event_handler_address.arn
     handler = "app.lambda_handler"
@@ -33,10 +33,10 @@ resource "aws_lambda_function" "dpd_active_calls_download_event_handler_address_
     timeout = 60
     environment {
       variables = {
-        ADDRESS_QUEUE_URL = "https://sqs.${local.region}.amazonaws.com/${local.account_id}/dpd-active-calls-geocode-address-queue"
+        ADDRESS_QUEUE_URL = "https://sqs.${var.aws_region}.amazonaws.com/${var.aws_account_id}/dpd-active-calls-geocode-address-queue"
         ADDRESS_CACHE_TABLE = "${aws_dynamodb_table.address_cache.id}"
         TTL_SECONDS = "129600"
       }
     }
-    layers = [ "${aws_lambda_layer_version.utils.arn}", "${aws_lambda_layer_version.dynamodb_utils.arn}" ]
+    layers = [ "${var.utils_layer}", "${var.dynamodb_utils_layer}" ]
 }

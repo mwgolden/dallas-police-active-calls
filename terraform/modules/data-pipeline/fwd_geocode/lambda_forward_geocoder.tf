@@ -17,13 +17,13 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_geocoder_role" {
 
 data "archive_file" "deploy_forward_geocoder" {
     type = "zip"
-    source_dir = "../lambda/build/dpd_forward_geocoder/"
-    output_path = "../lambda/deploy/dpd-forward-geocoder.zip"
+    source_dir = var.lambda_radar_geocoder_handler_src_dir
+    output_path = var.lambda_radar_geocoder_zip_dir
 }
 
 
 resource "aws_lambda_function" "dpd_forward_geocoder_lambda" {
-    filename = "../lambda/deploy/dpd-forward-geocoder.zip"
+    filename = var.lambda_radar_geocoder_zip_dir
     function_name = "dpd_active_calls_forward_geocoder"
     role = aws_iam_role.lambda_role_geocoder.arn
     handler = "app.lambda_handler"
@@ -39,6 +39,6 @@ resource "aws_lambda_function" "dpd_forward_geocoder_lambda" {
         TTL_SECONDS = "129600"
       }
     }
-    layers = [ "${aws_lambda_layer_version.utils.arn}", "${aws_lambda_layer_version.dynamodb_utils.arn}" ]
+    layers = [ "${var.utils_layer}", "${var.dynamodb_utils_layer}" ]
     reserved_concurrent_executions = 1
 }

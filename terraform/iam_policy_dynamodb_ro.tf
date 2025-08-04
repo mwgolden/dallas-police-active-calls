@@ -7,6 +7,6 @@ data "aws_iam_policy_document" "dynamodb_ro" {
         "dynamodb:Scan",
         "dynamodb:DescribeTable"
       ]
-      resources = [ "${aws_dynamodb_table.dpd_active_calls.arn}", "${aws_dynamodb_table.address_cache.arn}" ]
+      resources = [ "${module.merge_calls.dpd_active_calls_dynamodb_table_arn}", "${module.fwd_geocode_address.address_cache_dynamodb_table_arn}" ]
     }
 }

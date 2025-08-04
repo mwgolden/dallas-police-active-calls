@@ -1,7 +1,7 @@
 data "archive_file" "deploy_lambda_layer_dynamodb_utils" {
     type = "zip"
-    source_dir = "../lambda/build/layer_dynamodb_utils/"
-    output_path = "../lambda/deploy/dpd_layer_dynamodb.zip"
+    source_dir = var.dynamodb_utils_archive_src_dir
+    output_path = var.dynamodb_utils_archive_zip_dir
 }
 
 resource "aws_lambda_layer_version" "dynamodb_utils" {
