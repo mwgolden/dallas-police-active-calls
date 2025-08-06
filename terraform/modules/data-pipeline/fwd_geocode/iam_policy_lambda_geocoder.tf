@@ -1,3 +1,7 @@
+data "aws_lambda_function" "fn_query_rest_api" {
+    function_name = "query_rest_api"
+}
+
 data "aws_iam_policy_document" "lambda_policy_geocoder" {
     statement {
         effect = "Allow"
@@ -26,7 +30,7 @@ data "aws_iam_policy_document" "lambda_policy_geocoder" {
       actions = [ 
         "dynamodb:*"
        ]
-       resources = [ "${aws_dynamodb_table.address_cache.arn}", "${aws_dynamodb_table.dpd_active_calls.arn}" ]
+       resources = [ "${aws_dynamodb_table.address_cache.arn}" ]
     }
 
     statement {

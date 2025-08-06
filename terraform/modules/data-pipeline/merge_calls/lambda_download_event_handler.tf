@@ -17,13 +17,13 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_event_handler_ro
 
 data "archive_file" "deploy_dpd_active_calls_download_event_handler" {
     type = "zip"
-    source_dir = "../lambda/build/dpd_active_calls_download_event_handler/"
-    output_path = "../lambda/deploy/dpd-active-calls-download-event-handler.zip"
+    source_dir = var.lambda_downloader_archive_src_dir
+    output_path = var.lambda_downloader_zip_dir
 }
 
 
 resource "aws_lambda_function" "dpd_active_calls_download_event_handler_lambda" {
-    filename = "../lambda/deploy/dpd-active-calls-download-event-handler.zip"
+    filename = var.lambda_downloader_zip_dir
     function_name = "dpd_active_calls_download_event_handler"
     role = aws_iam_role.lambda_role_event_handler.arn
     handler = "app.lambda_handler"
@@ -33,13 +33,10 @@ resource "aws_lambda_function" "dpd_active_calls_download_event_handler_lambda" 
     timeout = 60
     environment {
       variables = {
-        #ADDRESS_QUEUE_URL = "https://sqs.${local.region}.amazonaws.com/${local.account_id}/dpd-active-calls-process-address-queue"
-        #CHANGE_PROCESS_QUEUE = "https://sqs.${local.region}.amazonaws.com/${local.account_id}/dpd-active-calls-process-changes-queue"
-        #ADDRESS_CACHE_TABLE = "${aws_dynamodb_table.address_cache.id}"
         ACTIVE_CALLS_TABLE = "${aws_dynamodb_table.dpd_active_calls.id}"
         FILE_CACHE = "${aws_dynamodb_table.dpd_active_calls_file_cache.id}"
         TTL_SECONDS = "129600"
       }
     }
-    layers = [ "${aws_lambda_layer_version.utils.arn}", "${aws_lambda_layer_version.dynamodb_utils.arn}" ]
+    layers = [ "${var.utils_layer}", "${var.dynamodb_utils_layer}" ]
 }

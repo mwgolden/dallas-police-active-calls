@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "lambda_policy_downloader_address" {
       "s3:GetObject",
       "s3:List*"
       ]
-      resources = [ "${aws_s3_bucket.police_data.arn}", "${aws_s3_bucket.police_data.arn}/*" ]
+      resources = [ "${var.police_data_bucket_arn}", "${var.police_data_bucket_arn}/*" ]
     }
 
     statement {
@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "lambda_policy_downloader_address" {
         "sqs:DeleteMessage",
         "sqs:GetQueueAttributes"
       ]
-      resources = [ "${aws_sqs_queue.s3_created_queue_2.arn}" ]
+      resources = [ "${aws_sqs_queue.address_processing_queue.arn}" ]
     }
 
     statement {

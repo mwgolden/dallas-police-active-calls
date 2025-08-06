@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "lambda_policy_event_handler" {
       "s3:GetObject",
       "s3:List*"
       ]
-      resources = [ "${aws_s3_bucket.police_data.arn}", "${aws_s3_bucket.police_data.arn}/*" ]
+      resources = [ "${var.police_data_bucket_arn}", "${var.police_data_bucket_arn}/*" ]
     }
 
     statement {
@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "lambda_policy_event_handler" {
         "sqs:DeleteMessage",
         "sqs:GetQueueAttributes"
       ]
-      resources = [ "${aws_sqs_queue.s3_created_queue_1.arn}" ]
+      resources = [ "${aws_sqs_queue.merge_calls_queue.arn}" ]
     }
 
     statement {
@@ -36,6 +36,6 @@ data "aws_iam_policy_document" "lambda_policy_event_handler" {
       actions = [ 
         "dynamodb:*"
        ]
-       resources = [ "${aws_dynamodb_table.address_cache.arn}", "${aws_dynamodb_table.dpd_active_calls_file_cache.arn}", "${aws_dynamodb_table.dpd_active_calls.arn}" ]
+       resources = [ "${aws_dynamodb_table.dpd_active_calls_file_cache.arn}", "${aws_dynamodb_table.dpd_active_calls.arn}" ]
     }
 }

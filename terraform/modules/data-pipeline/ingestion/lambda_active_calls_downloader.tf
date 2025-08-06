@@ -1,32 +1,12 @@
-resource "aws_iam_role" "lambda_role" {
-    name = "dpd_active_calls_downloader"
-    assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-}
-
-resource "aws_iam_policy" "lambda_policy" {
-    name = "dpd_active_calls_downloader_policy"
-    path = "/"
-    description = "AWS IAM Poplicy for DPD Active Calls Downloader lambda"
-    policy = data.aws_iam_policy_document.lambda_policy_downloader.json
-}
-
-resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_role" {
-    role = aws_iam_role.lambda_role.name
-    policy_arn = aws_iam_policy.lambda_policy.arn
-}
-
 data "archive_file" "deploy_dpd_active_calls_downloader" {
     type = "zip"
-    source_dir = "../lambda/build/dpd_active_calls_downloader/"
-    output_path = "../lambda/deploy/dpd-active-calls-downloader.zip"
+    source_dir = var.lambda_downloader_archive_src_dir
+    output_path = var.lambda_downloader_zip_dir
 }
 
-data "aws_lambda_function" "fn_query_rest_api" {
-    function_name = "query_rest_api"
-}
 
 resource "aws_lambda_function" "dpd_active_calls_downloader_lambda" {
-    filename = "../lambda/deploy/dpd-active-calls-downloader.zip"
+    filename = var.lambda_downloader_zip_dir
     function_name = "dpd_active_calls_downloader"
     role = aws_iam_role.lambda_role.arn
     handler = "app.lambda_handler"

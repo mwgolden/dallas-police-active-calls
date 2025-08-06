@@ -38,11 +38,11 @@ resource "aws_lambda_function" "dpd_active_calls_dynamodb_updates_lambda" {
             EVENT_URL = var.api_event_push_url
         }
     }
-    layers = [ "${aws_lambda_layer_version.utils.arn}", "${aws_lambda_layer_version.dynamodb_utils.arn}" ]
+    layers = [ "${var.utils_layer}", "${var.dynamodb_utils_layer}" ]
 }
 
 resource "aws_lambda_event_source_mapping" "lambda_dynamodb" {
-  event_source_arn  = aws_dynamodb_table.dpd_active_calls.stream_arn
+  event_source_arn  = var.active_calls_event_src_arn
   function_name     = aws_lambda_function.dpd_active_calls_dynamodb_updates_lambda.arn
   starting_position = "LATEST"
   filter_criteria {
@@ -55,7 +55,7 @@ resource "aws_lambda_event_source_mapping" "lambda_dynamodb" {
 }
 
 resource "aws_lambda_event_source_mapping" "new_address_dynamodb" {
-  event_source_arn  = aws_dynamodb_table.address_cache.stream_arn
+  event_source_arn  = var.address_cache_event_src_arn
   function_name     = aws_lambda_function.dpd_active_calls_dynamodb_updates_lambda.arn
   starting_position = "LATEST"
   filter_criteria {
