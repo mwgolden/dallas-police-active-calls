@@ -52,9 +52,8 @@ def get_file_body(file: tuple):
     if not file:
         return None
     data = read_file(file)
-    body = data['body']
     return_obj = {}
-    for item in body:
+    for item in data:
         id = (item['incident_number'], item['unit_number'])
         return_obj[id] = item 
     return return_obj
