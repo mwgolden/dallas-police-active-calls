@@ -1,5 +1,5 @@
-data "aws_lambda_function" "fn_query_rest_api" {
-    function_name = "query_rest_api"
+data "aws_dynamodb_table" "api_config_table" {
+    name = local.api_config_table
 }
 
 data "aws_iam_policy_document" "lambda_assume_role" {
@@ -40,9 +40,13 @@ data "aws_iam_policy_document" "lambda_policy_downloader" {
     statement {
       effect = "Allow"
       actions = [ 
-        "lambda:InvokeFunction"
+        "dynamodb:GetItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords"
        ]
-       resources = [ data.aws_lambda_function.fn_query_rest_api.arn ]
+       resources = [ data.aws_dynamodb_table.api_config_table.arn ]
     }
 }
 

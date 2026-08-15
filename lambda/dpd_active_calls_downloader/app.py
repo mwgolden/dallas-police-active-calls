@@ -5,18 +5,18 @@ import pytz
 import os
 import logging
 
+from urllib3.poolmanager import PoolManager
+from api_token_cache.http_requests import http_request
+from api_token_cache.models import DynamoDbConfig
+
 logger = logging.getLogger()
 if not logger.handlers:  # To ensure no duplicate handlers
     logging.basicConfig(level=logging.INFO)
 logger.setLevel(logging.INFO)
 
-endpoint = os.getenv("DPD_ACTIVE_CALLS_ENDPOINT")
-bot = os.getenv("BOT_NAME")
-bucket = os.getenv("BUCKET_NAME")
-bucket_key = os.getenv("FOLDER")
-lambda_to_invoke = os.getenv("LAMBDA_TO_INVOKE")
-
 def write_to_s3(data):
+    bucket = os.getenv("BUCKET_NAME")
+    bucket_key = os.getenv("FOLDER")
     try:
         tz = pytz.timezone('US/Central')
         now = datetime.now(tz)
@@ -32,21 +32,25 @@ def write_to_s3(data):
         raise
 
 def lambda_handler(event, context):
+    bot_name = os.getenv("BOT_NAME")
+    endpoint = os.getenv("DPD_ACTIVE_CALLS_ENDPOINT")
     logger.info(f"Request ID: {context.aws_request_id}, Function Name: {context.function_name}")
-    logger.info(f"Bot Name: {bot}, Endpoint: {endpoint}")
-    evt = {
-        "bot_name": bot,
-        "endpoint": endpoint
-    }
+    logger.info(f"Bot Name: {bot_name}, Endpoint: {endpoint}")
+    logger.info(f"API Config Table: {os.getenv("API_CONFIG_TABLE")}")
+    logger.info(f"API Toke Cache Table: {os.getenv("API_TOKEN_CACHE_TABLE")}")
+
+    db_config = DynamoDbConfig(
+        api_config_table=os.getenv("API_CONFIG_TABLE"),
+        api_token_cache_table=os.getenv("API_TOKEN_CACHE_TABLE")
+    )
+    http_pool = PoolManager()
     try:
-        lambda_client = boto3.client('lambda')
-        response = lambda_client.invoke(
-            FunctionName=lambda_to_invoke,
-            InvocationType='RequestResponse',
-            Payload=json.dumps(evt)
+        data = http_request(
+            url=endpoint,
+            bot_name=bot_name,
+            db_config=db_config,
+            http=http_pool
         )
-        logger.info(f"Lambda {lambda_to_invoke} invoked successfully. Response: {response['StatusCode']}")
-        data = json.load(response['Payload'])
         write_to_s3(data)
 
         return {
@@ -59,4 +63,3 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": str(e)})
          }
-    
