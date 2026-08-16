@@ -14,6 +14,8 @@ if not logger.handlers:  # To ensure no duplicate handlers
     logging.basicConfig(level=logging.INFO)
 logger.setLevel(logging.INFO)
 
+http_pool = PoolManager()
+
 def write_to_s3(data):
     bucket = os.getenv("BUCKET_NAME")
     bucket_key = os.getenv("FOLDER")
@@ -43,7 +45,6 @@ def lambda_handler(event, context):
         api_config_table=os.getenv("API_CONFIG_TABLE"),
         api_token_cache_table=os.getenv("API_TOKEN_CACHE_TABLE")
     )
-    http_pool = PoolManager()
     try:
         data = http_request(
             url=endpoint,
