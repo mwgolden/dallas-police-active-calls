@@ -1,0 +1,10 @@
+[project]
+name = "dallas-police-active-calls"
+version = "1.0"
+
+dependencies = [
+    "api-token-cache @ git+https://github.com/mwgolden/aws-api-token-cache.git"
+]
+
+[tool.setuptools]
+packages = []
