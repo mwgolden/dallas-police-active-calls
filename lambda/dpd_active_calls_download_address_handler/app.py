@@ -56,7 +56,7 @@ def lambda_handler(event, context):
             bucket = e['s3']['bucket']['name']
             key = e['s3']['object']['key']
             cur_file = (bucket, key)
-            cur_data = read_file(cur_file)['body']
+            cur_data = read_file(cur_file)
             addresses = [transform_address(record) for record in cur_data]
             unique_addr = unique_addresses(addresses)
             query_results = query_address_cache(unique_addr)
