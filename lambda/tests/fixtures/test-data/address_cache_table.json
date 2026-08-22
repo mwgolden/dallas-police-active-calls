@@ -1,0 +1,140 @@
+{
+    "Items": [
+        {
+            "address_id": "66af38cee1b4f0d2ce7393adb0164e47f689646b",
+            "addresses": [
+                {
+                    "country": "United States",
+                    "distance": "1870797.976963506",
+                    "city": "Dallas",
+                    "postalCode": "75207",
+                    "latitude": "32.77465",
+                    "confidence": "interpolated",
+                    "county": "Dallas",
+                    "timeZone": {
+                        "name": "Central Daylight Time",
+                        "currentTime": "2026-08-18T15:06:17-05:00",
+                        "dstOffset": "3600",
+                        "id": "America/Chicago",
+                        "code": "CDT",
+                        "utcOffset": "-18000"
+                    },
+                    "addressLabel": "300 S Riverfront Blvd",
+                    "layer": "address",
+                    "number": "300",
+                    "formattedAddress": "300 S Riverfront Blvd, Dallas, TX 75207 US",
+                    "countryFlag": "\ud83c\uddfa\ud83c\uddf8",
+                    "street": "S Riverfront Blvd",
+                    "countryCode": "US",
+                    "stateCode": "TX",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            "-96.81352",
+                            "32.77465"
+                        ]
+                    },
+                    "state": "Texas",
+                    "longitude": "-96.81352"
+                }
+            ],
+            "expires_on": "1787213177"
+        },
+        {
+            "address_id": "c8759a23ffaea7500e5dd347530ec486fd70fb1e",
+            "addresses": [
+                {
+                    "country": "United States",
+                    "distance": "1858162.924547362",
+                    "city": "Dallas",
+                    "postalCode": "75238",
+                    "latitude": "32.88365644595134",
+                    "confidence": "fallback",
+                    "county": "Dallas",
+                    "timeZone": {
+                        "name": "Central Daylight Time",
+                        "currentTime": "2026-08-18T09:31:19-05:00",
+                        "dstOffset": "3600",
+                        "id": "America/Chicago",
+                        "code": "CDT",
+                        "utcOffset": "-18000"
+                    },
+                    "addressLabel": "9400 Estate Ln",
+                    "layer": "address",
+                    "number": "9400",
+                    "formattedAddress": "9400 Estate Ln, Dallas, TX 75238 US",
+                    "countryFlag": "\ud83c\uddfa\ud83c\uddf8",
+                    "street": "Estate Ln",
+                    "countryCode": "US",
+                    "stateCode": "TX",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            "-96.72821248304747",
+                            "32.88365644595134"
+                        ]
+                    },
+                    "state": "Texas",
+                    "longitude": "-96.72821248304747"
+                }
+            ],
+            "expires_on": "1787193080"
+        },
+        {
+            "address_id": "3003a29f9bbce290913fc94fc14ba63a424d891a",
+            "addresses": [
+                {
+                    "country": "United States",
+                    "distance": "1885713.3639631923",
+                    "city": "Dallas",
+                    "postalCode": "75236",
+                    "latitude": "32.6873",
+                    "confidence": "interpolated",
+                    "county": "Dallas",
+                    "timeZone": {
+                        "name": "Central Daylight Time",
+                        "currentTime": "2026-08-18T01:21:16-05:00",
+                        "dstOffset": "3600",
+                        "id": "America/Chicago",
+                        "code": "CDT",
+                        "utcOffset": "-18000"
+                    },
+                    "addressLabel": "4800 Spur 408",
+                    "layer": "address",
+                    "number": "4800",
+                    "formattedAddress": "4800 Spur 408, Dallas, TX 75236 US",
+                    "countryFlag": "\ud83c\uddfa\ud83c\uddf8",
+                    "street": "Spur 408",
+                    "countryCode": "US",
+                    "stateCode": "TX",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            "-96.93923",
+                            "32.6873"
+                        ]
+                    },
+                    "state": "Texas",
+                    "longitude": "-96.93923"
+                }
+            ],
+            "expires_on": "1787163676"
+        }
+    ],
+    "Count": 3,
+    "ScannedCount": 3,
+    "ResponseMetadata": {
+        "RequestId": "CNBJHDGHBA345R43JAHJFGVJnvjDFAPSEUHGF",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "server": "Server",
+            "date": "Wed, 19 Aug 2026 10:41:05 GMT",
+            "content-type": "application/x-amz-json-1.0",
+            "content-length": "1074112",
+            "connection": "keep-alive",
+            "x-amzn-requestid": "CNBJHDGHBA345R43JAHJFGVJnvjDFAPSEUHGF",
+            "x-amz-crc32": "1233245"
+        },
+        "RetryAttempts": 0
+    }
+}
