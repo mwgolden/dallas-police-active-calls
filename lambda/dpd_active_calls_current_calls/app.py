@@ -9,7 +9,7 @@ def serialize_decimal(obj):
         return str(obj)
     raise TypeError('Type not serializable')
 
-def get_current_active_calls(calls, addresses) -> list:
+def get_current_active_calls(calls: list, addresses: dict) -> list:
     if not calls:
         return []
 
@@ -51,7 +51,7 @@ def lambda_handler(event, context):
     addresses = dict()
     for address in address_items:
         addresses[address['address_id']] = address['addresses']
-
+    
     active_calls = get_current_active_calls(calls=call_items, addresses=addresses)
     
 

@@ -2,9 +2,9 @@ import pytest
 import json
 import boto3
 from pathlib import Path
-from collections import Counter
 
-from dpd_active_calls_current_calls.app import lambda_handler
+
+from dpd_active_calls_current_calls.app import lambda_handler, get_current_active_calls
 
 
 def read_json_file(data_path):
@@ -61,3 +61,60 @@ def test_integration_dpd_current_calls(mock_dynamodb, monkeypatch):
     response_call_ids = {item["call_id"] for item in current_call_data.get("current_active_calls", [])}
 
     assert response_call_ids == expected_call_ids
+
+
+def test_most_recent_call():
+    # Objects reduced to necessary fields
+    multiple_same_call_id = [
+        {
+            "call_id": "3257c5f37e29e5282b69024475b1fdc1dd41e830",
+            "change_type": "add",
+            "update_date": "2026-08-18 02:46:15",
+            "address_id": "66af38cee1b4f0d2ce7393adb0164e47f689646b"
+        },
+        {
+            "call_id": "3257c5f37e29e5282b69024475b1fdc1dd41e830",
+            "change_type": "update",
+            "update_date": "2026-08-18 03:46:15",
+            "address_id": "66af38cee1b4f0d2ce7393adb0164e47f689646b"
+        },
+        {
+            "call_id": "3257c5f37e29e5282b69024475b1fdc1dd41e830",
+            "change_type": "update",
+            "update_date": "2026-08-18 04:46:15",
+            "address_id": "66af38cee1b4f0d2ce7393adb0164e47f689646b"
+        }
+    ]
+
+    current_calls = get_current_active_calls(calls=multiple_same_call_id, addresses=dict())
+
+    assert len(current_calls) == 1
+    assert current_calls[0]["update_date"] == "2026-08-18 04:46:15"
+
+
+def test_deleted_most_recent_call():
+    # Objects reduced to necessary fields
+    multiple_same_call_id = [
+        {
+            "call_id": "3257c5f37e29e5282b69024475b1fdc1dd41e830",
+            "change_type": "add",
+            "update_date": "2026-08-18 02:46:15",
+            "address_id": "66af38cee1b4f0d2ce7393adb0164e47f689646b"
+        },
+        {
+            "call_id": "3257c5f37e29e5282b69024475b1fdc1dd41e830",
+            "change_type": "update",
+            "update_date": "2026-08-18 03:46:15",
+            "address_id": "66af38cee1b4f0d2ce7393adb0164e47f689646b"
+        },
+        {
+            "call_id": "3257c5f37e29e5282b69024475b1fdc1dd41e830",
+            "change_type": "delete",
+            "update_date": "2026-08-18 04:46:15",
+            "address_id": "66af38cee1b4f0d2ce7393adb0164e47f689646b"
+        }
+    ]
+
+    current_calls = get_current_active_calls(calls=multiple_same_call_id, addresses=dict())
+
+    assert len(current_calls) == 0
