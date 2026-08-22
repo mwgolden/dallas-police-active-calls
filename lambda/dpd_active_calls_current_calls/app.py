@@ -1,3 +1,4 @@
+import os
 import boto3
 import json
 from datetime import datetime
@@ -8,38 +9,51 @@ def serialize_decimal(obj):
         return str(obj)
     raise TypeError('Type not serializable')
 
-def lambda_handler(event, context): 
-    ddb = boto3.resource('dynamodb')
-    call_table = ddb.Table('dpd_active_calls')
-    address_cache = ddb.Table('address_cache')
-
-    # Get calls and addresses
-    response = call_table.scan()
-    address_cache_response = address_cache.scan()
-
-    # get cached address data 
-    addresses = {}
-    for address in address_cache_response['Items']:
-        addresses[address['address_id']] = address['addresses']
+def get_current_active_calls(calls, addresses) -> list:
+    if not calls:
+        return []
 
     # Find most recent update_date for each call_id
     current_records = dict()
-    for item in response['Items']:
+    for item in calls:
         call_id = item['call_id']
         update_date = datetime.strptime(item['update_date'], "%Y-%m-%d %H:%M:%S")
         change_type = item['change_type']
         cur = current_records.get(call_id)
         if not cur or cur['update_date'] < update_date:
             current_records[call_id] = {"update_date": update_date, "change_type": change_type}
-
+    
     # Filter current_records for active calls and add address record
     active_calls = []
-    for item in response["Items"]:
-        call_id, update_date = item["call_id"], datetime.strptime(item["update_date"], "%Y-%m-%d %H:%M:%S")
+    for call in calls:
+        call_id, update_date = call["call_id"], datetime.strptime(call["update_date"], "%Y-%m-%d %H:%M:%S")
         cur = current_records.get(call_id)
         if cur and cur["update_date"] == update_date and cur["change_type"] != "delete":
-            item['address'] = addresses.get(item['address_id'])
-            active_calls.append(item)
+            call['address'] = addresses.get(call['address_id'])
+            active_calls.append(call)
+
+    return active_calls
+
+
+def lambda_handler(event, context): 
+    ddb = boto3.resource('dynamodb')
+    call_table = ddb.Table(os.getenv('CALL_TABLE'))
+    address_cache = ddb.Table(os.getenv('ADDRESS_CACHE'))
+
+    # Get calls and addresses
+    response = call_table.scan()
+    address_cache_response = address_cache.scan()
+
+    call_items = response.get("Items", [])
+    address_items = address_cache_response.get("Items", [])
+
+    # get cached address data 
+    addresses = dict()
+    for address in address_items:
+        addresses[address['address_id']] = address['addresses']
+
+    active_calls = get_current_active_calls(calls=call_items, addresses=addresses)
+    
 
     return {
         "statusCode": 200,

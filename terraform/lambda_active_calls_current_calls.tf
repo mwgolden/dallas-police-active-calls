@@ -27,6 +27,12 @@ resource "aws_lambda_function" "dpd_active_calls_current_calls_lambda" {
     role = aws_iam_role.lambda_role_current_calls.arn
     handler = "app.lambda_handler"
     runtime = "python3.12"
+    environment {
+      variables = {
+        CALL_TABLE = "dpd_active_calls"
+        ADDRESS_CACHE = "address_cache"
+      }
+    }
     depends_on = [ aws_iam_role_policy_attachment.attach_iam_policy_to_current_calls_role ]
     source_code_hash = data.archive_file.deploy_dpd_active_calls_current_calls.output_base64sha256
     timeout = 60
