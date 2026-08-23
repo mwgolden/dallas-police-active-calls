@@ -117,4 +117,4 @@ def test_deleted_most_recent_call():
 
     current_calls = get_current_active_calls(calls=multiple_same_call_id, addresses=dict())
 
-    assert len(current_calls) == 0
+    assert current_calls == []

@@ -13,25 +13,21 @@ def get_current_active_calls(calls: list, addresses: dict) -> list:
     if not calls:
         return []
 
-    # Find most recent update_date for each call_id
+    # Find most recent record for each call_id
     current_records = dict()
-    for item in calls:
-        call_id = item['call_id']
-        update_date = datetime.strptime(item['update_date'], "%Y-%m-%d %H:%M:%S")
-        change_type = item['change_type']
-        cur = current_records.get(call_id)
-        if not cur or cur['update_date'] < update_date:
-            current_records[call_id] = {"update_date": update_date, "change_type": change_type}
-    
-    # Filter current_records for active calls and add address record
-    active_calls = []
     for call in calls:
-        call_id, update_date = call["call_id"], datetime.strptime(call["update_date"], "%Y-%m-%d %H:%M:%S")
+        call_id = call['call_id']
         cur = current_records.get(call_id)
-        if cur and cur["update_date"] == update_date and cur["change_type"] != "delete":
-            call['address'] = addresses.get(call['address_id'])
-            active_calls.append(call)
+        if not cur or cur['update_date'] < call['update_date']:
+            current_call = {
+                **call,
+                "address": addresses.get(call['address_id'])
+            }   
+            current_records[call_id] = current_call
 
+    # Filter current_records for active calls
+    active_calls = [call for _, call in current_records.items() if call["change_type"] != "delete"]
+    
     return active_calls
 
 
